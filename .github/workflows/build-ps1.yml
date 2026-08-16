@@ -1,4 +1,4 @@
-name: Build PS2-Launcher PS1 USB test v7
+name: Build PS2-Launcher PS1 USB test v8
 
 on:
   workflow_dispatch:
@@ -29,16 +29,24 @@ jobs:
             -w /src \
             ps2dev/ps2dev:latest \
             sh -lc '
-              apk add --no-cache build-base git bash &&
+              apk add --no-cache build-base git bash curl py3-yaml &&
               export PS2DEV=/usr/local/ps2dev &&
               export PS2SDK=$PS2DEV/ps2sdk &&
               export GSKIT=$PS2DEV/gsKit &&
               export PATH="$PATH:$PS2DEV/bin:$PS2DEV/ee/bin:$PS2DEV/iop/bin:$PS2DEV/dvp/bin:$PS2SDK/bin" &&
               git config --global --add safe.directory /src &&
+              if [ ! -d modules/network/lwNBD ]; then
+                git clone https://github.com/bignaux/lwNBD.git modules/network/lwNBD &&
+                (cd modules/network/lwNBD && git checkout 9777a10f840679ef89b1ec6a588e2d93803d7c37);
+              fi &&
+              if [ ! -f lang_compiler.py ]; then
+                curl -L https://raw.githubusercontent.com/ps2homebrew/Open-PS2-Loader/master/lang_compiler.py -o lang_compiler.py;
+              fi &&
+              python3 lang_compiler.py --make_header --base lng_tmpl/_base.yml include/lang_autogen.h &&
+              python3 lang_compiler.py --make_source --base lng_tmpl/_base.yml src/lang_internal.c &&
               echo "PS2DEV=$PS2DEV" &&
               command -v mips64r5900el-ps2-elf-gcc &&
               command -v make &&
-              make clean || true
               make -j2 LOCALVERSION=ps1-usb-test
             '
 
@@ -57,6 +65,6 @@ jobs:
       - name: Upload ELF
         uses: actions/upload-artifact@v4
         with:
-          name: PS2Launcher-PS1-USB-test-v7
+          name: PS2Launcher-PS1-USB-test-v8
           path: out/*.ELF
           if-no-files-found: error
