@@ -1,30 +1,637 @@
-name: Build PS2-Launcher PS1 USB classic v12
+name: Build PS2 Launcher - PS1 USB Glass
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Get PS2-Launcher 4.0.0
+      - name: Clone clean upstream v4.0.0
         run: |
-          git clone --recursive --branch v4.0.0 --depth 1 https://github.com/Irfanlesnar/PS2-Launcher.git src
+          git clone --branch v4.0.0 --depth 1 --recurse-submodules https://github.com/Irfanlesnar/PS2-Launcher.git src
 
-      - name: Add PS1 USB support
+      - name: Apply readable PS1 patch
         run: |
-          echo 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCgpkZWYgcmVhZChwKToKICAgIHJldHVybiBQYXRoKCJzcmMiLCBwKS5yZWFkX3RleHQoKQoKZGVmIHdyaXRlKHAsIHMpOgogICAgUGF0aCgic3JjIiwgcCkud3JpdGVfdGV4dChzKQoKZGVmIHJlcChzLCBvbGQsIG5ldywgbGFiZWwpOgogICAgbiA9IHMuY291bnQob2xkKQogICAgaWYgbiAhPSAxOgogICAgICAgIHJhaXNlIFN5c3RlbUV4aXQoZiJ7bGFiZWx9OiBleHBlY3RlZCBleGFjdGx5IDEgbWF0Y2gsIGZvdW5kIHtufSIpCiAgICByZXR1cm4gcy5yZXBsYWNlKG9sZCwgbmV3LCAxKQoKIyBpbmNsdWRlL3N1cHBvcnRiYXNlLmgKcCA9ICJpbmNsdWRlL3N1cHBvcnRiYXNlLmgiCnMgPSByZWFkKHApCnMgPSByZXAoCiAgICBzLAogICAgJycnICAgIEdBTUVfRk9STUFUX0lTTywKfTsnJycsCiAgICAnJycgICAgR0FNRV9GT1JNQVRfSVNPLAogICAgR0FNRV9GT1JNQVRfUFMxX1ZDRCwKfTsnJycsCiAgICAic3VwcG9ydGJhc2UgZW51bSIsCikKcyA9IHJlcCgKICAgIHMsCiAgICAiaW50IHNiUmVhZExpc3QoYmFzZV9nYW1lX2luZm9fdCAqKmxpc3QsIGNvbnN0IGNoYXIgKnByZWZpeCwgaW50ICpmc2l6ZSwgaW50ICpnYW1lY291bnQpOyIsCiAgICAiaW50IHNiUmVhZExpc3QoYmFzZV9nYW1lX2luZm9fdCAqKmxpc3QsIGNvbnN0IGNoYXIgKnByZWZpeCwgaW50ICpmc2l6ZSwgaW50ICpnYW1lY291bnQsIGludCBzY2FuUFMxVkNEcyk7IiwKICAgICJzdXBwb3J0YmFzZSBwcm90b3R5cGUiLAopCndyaXRlKHAsIHMpCgojIGluY2x1ZGUvc3lzdGVtLmgKcCA9ICJpbmNsdWRlL3N5c3RlbS5oIgpzID0gcmVhZChwKQpzID0gcmVwKAogICAgcywKICAgICJpbnQgc3lzRXhlY0VsZihjb25zdCBjaGFyICpwYXRoKTsiLAogICAgJycnaW50IHN5c0V4ZWNFbGYoY29uc3QgY2hhciAqcGF0aCk7CmludCBzeXNFeGVjRWxmV2l0aEFyZ3MoY29uc3QgY2hhciAqcGF0aCwgaW50IGV4dHJhX2FyZ2MsIGNvbnN0IGNoYXIgKmNvbnN0IGV4dHJhX2FyZ3ZbXSk7JycnLAogICAgInN5c3RlbSBwcm90b3R5cGUiLAopCndyaXRlKHAsIHMpCgojIHNyYy9zeXN0ZW0uYwpwID0gInNyYy9zeXN0ZW0uYyIKcyA9IHJlYWQocCkKb2xkID0gcicnJ2ludCBzeXNFeGVjRWxmKGNvbnN0IGNoYXIgKnBhdGgpCnsKICAgIGNoYXIgKmFyZ3ZbMV07CiAgICBjaGFyIGV4ZWNQYXRoWzI1Nl07CiAgICB0X0V4ZWNEYXRhIGVsZjsKICAgIGludCBpOwoKICAgIGlmIChwYXRoID09IE5VTEwgfHwgcGF0aFswXSA9PSAnXDAnKQogICAgICAgIHJldHVybiAtMTsKCiAgICBmb3IgKGkgPSAwOyBpIDwgKGludClzaXplb2YoZXhlY1BhdGgpIC0gMSAmJiBwYXRoW2ldICE9ICdcMCc7IGkrKykKICAgICAgICBleGVjUGF0aFtpXSA9IHBhdGhbaV07CiAgICBleGVjUGF0aFtpXSA9ICdcMCc7CgogICAgYXJndlswXSA9IGV4ZWNQYXRoOwoKICAgIGlmIChTaWZMb2FkRWxmKGV4ZWNQYXRoLCAmZWxmKSAhPSAwKQogICAgICAgIHJldHVybiAtMTsKCiAgICBkZWluaXQoTk9fRVhDRVBUSU9OLCBJT19NT0RFX1NFTEVDVEVEX05PTkUpOwogICAgc3lzUmVzZXQoMCk7CgogICAgRmx1c2hDYWNoZSgwKTsKICAgIEZsdXNoQ2FjaGUoMik7CgogICAgU2lmTG9hZEZpbGVFeGl0KCk7CiAgICBTaWZFeGl0SW9wSGVhcCgpOwogICAgU2lmRXhpdFJwYygpOwoKICAgIEV4ZWNQUzIoKHZvaWQgKillbGYuZXBjLCAodm9pZCAqKWVsZi5ncCwgMSwgYXJndik7CiAgICByZXR1cm4gMDsKfScnJwpuZXcgPSByJycnI2RlZmluZSBTWVNfRVhFQ19NQVhfRVhUUkFfQVJHUyA0CiNkZWZpbmUgU1lTX0VYRUNfQVJHX01BWCAyNTYKCmludCBzeXNFeGVjRWxmV2l0aEFyZ3MoY29uc3QgY2hhciAqcGF0aCwgaW50IGV4dHJhX2FyZ2MsIGNvbnN0IGNoYXIgKmNvbnN0IGV4dHJhX2FyZ3ZbXSkKewogICAgY2hhciAqYXJndlsxICsgU1lTX0VYRUNfTUFYX0VYVFJBX0FSR1NdOwogICAgY2hhciBhcmdTdG9yYWdlW1NZU19FWEVDX01BWF9FWFRSQV9BUkdTXVtTWVNfRVhFQ19BUkdfTUFYXTsKICAgIGNoYXIgZXhlY1BhdGhbMjU2XTsKICAgIHRfRXhlY0RhdGEgZWxmOwogICAgaW50IGksIGFyZ2M7CgogICAgaWYgKHBhdGggPT0gTlVMTCB8fCBwYXRoWzBdID09ICdcMCcpCiAgICAgICAgcmV0dXJuIC0xOwogICAgaWYgKGV4dHJhX2FyZ2MgPCAwIHx8IGV4dHJhX2FyZ2MgPiBTWVNfRVhFQ19NQVhfRVhUUkFfQVJHUykKICAgICAgICByZXR1cm4gLTE7CiAgICBpZiAoZXh0cmFfYXJnYyA+IDAgJiYgZXh0cmFfYXJndiA9PSBOVUxMKQogICAgICAgIHJldHVybiAtMTsKCiAgICBmb3IgKGkgPSAwOyBpIDwgKGludClzaXplb2YoZXhlY1BhdGgpIC0gMSAmJiBwYXRoW2ldICE9ICdcMCc7IGkrKykKICAgICAgICBleGVjUGF0aFtpXSA9IHBhdGhbaV07CiAgICBleGVjUGF0aFtpXSA9ICdcMCc7CgogICAgYXJndlswXSA9IGV4ZWNQYXRoOwogICAgYXJnYyA9IDE7CgogICAgZm9yIChpID0gMDsgaSA8IGV4dHJhX2FyZ2M7IGkrKykgewogICAgICAgIGlmIChleHRyYV9hcmd2W2ldID09IE5VTEwpCiAgICAgICAgICAgIHJldHVybiAtMTsKICAgICAgICBzdHJuY3B5KGFyZ1N0b3JhZ2VbaV0sIGV4dHJhX2FyZ3ZbaV0sIFNZU19FWEVDX0FSR19NQVggLSAxKTsKICAgICAgICBhcmdTdG9yYWdlW2ldW1NZU19FWEVDX0FSR19NQVggLSAxXSA9ICdcMCc7CiAgICAgICAgYXJndlthcmdjKytdID0gYXJnU3RvcmFnZVtpXTsKICAgIH0KCiAgICBpZiAoU2lmTG9hZEVsZihleGVjUGF0aCwgJmVsZikgIT0gMCkKICAgICAgICByZXR1cm4gLTE7CgogICAgZGVpbml0KE5PX0VYQ0VQVElPTiwgSU9fTU9ERV9TRUxFQ1RFRF9OT05FKTsKICAgIHN5c1Jlc2V0KDApOwoKICAgIEZsdXNoQ2FjaGUoMCk7CiAgICBGbHVzaENhY2hlKDIpOwoKICAgIFNpZkxvYWRGaWxlRXhpdCgpOwogICAgU2lmRXhpdElvcEhlYXAoKTsKICAgIFNpZkV4aXRScGMoKTsKCiAgICBFeGVjUFMyKCh2b2lkICopZWxmLmVwYywgKHZvaWQgKillbGYuZ3AsIGFyZ2MsIGFyZ3YpOwogICAgcmV0dXJuIDA7Cn0KCmludCBzeXNFeGVjRWxmKGNvbnN0IGNoYXIgKnBhdGgpCnsKICAgIHJldHVybiBzeXNFeGVjRWxmV2l0aEFyZ3MocGF0aCwgMCwgTlVMTCk7Cn0nJycKcyA9IHJlcChzLCBvbGQsIG5ldywgInN5c0V4ZWNFbGYgYm9keSIpCndyaXRlKHAsIHMpCgojIHNyYy9zdXBwb3J0YmFzZS5jCnAgPSAic3JjL3N1cHBvcnRiYXNlLmMiCnMgPSByZWFkKHApCgptYXJrZXIgPSAiXG5pbnQgc2JSZWFkTGlzdChiYXNlX2dhbWVfaW5mb190ICoqbGlzdCwgY29uc3QgY2hhciAqcHJlZml4LCBpbnQgKmZzaXplLCBpbnQgKmdhbWVjb3VudClcbiIKaWYgcy5jb3VudChtYXJrZXIpICE9IDE6CiAgICByYWlzZSBTeXN0ZW1FeGl0KGYic2JSZWFkTGlzdCBtYXJrZXI6IGZvdW5kIHtzLmNvdW50KG1hcmtlcil9IikKCnNjYW5fZm4gPSByJycnCnN0YXRpYyBpbnQgc2NhbkZvclBTMVZDRChjb25zdCBjaGFyICpwYXRoLCBzdHJ1Y3QgZ2FtZV9saXN0X3QgKipnbGlzdCkKewogICAgaW50IGNvdW50ID0gMDsKICAgIERJUiAqZGlyOwogICAgc3RydWN0IGRpcmVudCAqZGlyZW50OwoKICAgIGRpciA9IG9wZW5kaXIocGF0aCk7CiAgICBpZiAoZGlyID09IE5VTEwpCiAgICAgICAgcmV0dXJuIDA7CgogICAgd2hpbGUgKChkaXJlbnQgPSByZWFkZGlyKGRpcikpICE9IE5VTEwpIHsKICAgICAgICBzaXplX3QgbGVuID0gc3RybGVuKGRpcmVudC0+ZF9uYW1lKTsKICAgICAgICBzaXplX3QgbmFtZUxlbjsKICAgICAgICBzdHJ1Y3QgZ2FtZV9saXN0X3QgKm5leHQ7CiAgICAgICAgYmFzZV9nYW1lX2luZm9fdCAqZ2FtZTsKCiAgICAgICAgaWYgKGxlbiA8PSA0IHx8IHN0cmNhc2VjbXAoJmRpcmVudC0+ZF9uYW1lW2xlbiAtIDRdLCAiLlZDRCIpICE9IDApCiAgICAgICAgICAgIGNvbnRpbnVlOwoKICAgICAgICBuYW1lTGVuID0gbGVuIC0gNDsKICAgICAgICBpZiAobmFtZUxlbiA9PSAwIHx8IG5hbWVMZW4gPiBJU09fR0FNRV9OQU1FX01BWCkKICAgICAgICAgICAgY29udGludWU7CgogICAgICAgIG5leHQgPSBtYWxsb2Moc2l6ZW9mKHN0cnVjdCBnYW1lX2xpc3RfdCkpOwogICAgICAgIGlmIChuZXh0ID09IE5VTEwpCiAgICAgICAgICAgIGJyZWFrOwoKICAgICAgICBtZW1zZXQobmV4dCwgMCwgc2l6ZW9mKHN0cnVjdCBnYW1lX2xpc3RfdCkpOwogICAgICAgIG5leHQtPm5leHQgPSAqZ2xpc3Q7CiAgICAgICAgKmdsaXN0ID0gbmV4dDsKICAgICAgICBnYW1lID0gJm5leHQtPmdhbWVpbmZvOwoKICAgICAgICBtZW1jcHkoZ2FtZS0+bmFtZSwgZGlyZW50LT5kX25hbWUsIG5hbWVMZW4pOwogICAgICAgIGdhbWUtPm5hbWVbbmFtZUxlbl0gPSAnXDAnOwogICAgICAgIHN0cmNweShnYW1lLT5leHRlbnNpb24sICIuVkNEIik7CiAgICAgICAgc25wcmludGYoZ2FtZS0+c3RhcnR1cCwgc2l6ZW9mKGdhbWUtPnN0YXJ0dXApLCAiUFMxJTA4WCIsIFVTQkFfY3JjMzIoZGlyZW50LT5kX25hbWUpKTsKCiAgICAgICAgZ2FtZS0+cGFydHMgPSAxOwogICAgICAgIGdhbWUtPm1lZGlhID0gU0NFQ2RQUzJDRDsKICAgICAgICBnYW1lLT5mb3JtYXQgPSBHQU1FX0ZPUk1BVF9QUzFfVkNEOwogICAgICAgIGdhbWUtPnNpemVNQiA9IDA7CiAgICAgICAgY291bnQrKzsKICAgIH0KCiAgICBjbG9zZWRpcihkaXIpOwogICAgcmV0dXJuIGNvdW50Owp9CicnJwpzID0gcy5yZXBsYWNlKG1hcmtlciwgIlxuIiArIHNjYW5fZm4gKyBtYXJrZXIsIDEpCnMgPSByZXAoCiAgICBzLAogICAgImludCBzYlJlYWRMaXN0KGJhc2VfZ2FtZV9pbmZvX3QgKipsaXN0LCBjb25zdCBjaGFyICpwcmVmaXgsIGludCAqZnNpemUsIGludCAqZ2FtZWNvdW50KSIsCiAgICAiaW50IHNiUmVhZExpc3QoYmFzZV9nYW1lX2luZm9fdCAqKmxpc3QsIGNvbnN0IGNoYXIgKnByZWZpeCwgaW50ICpmc2l6ZSwgaW50ICpnYW1lY291bnQsIGludCBzY2FuUFMxVkNEcykiLAogICAgInNiUmVhZExpc3Qgc2lnbmF0dXJlIiwKKQoKZHZkX2Jsb2NrID0gJycnICAgIHNucHJpbnRmKHBhdGgsIHNpemVvZihwYXRoKSwgIiVzRFZEIiwgcHJlZml4KTsKICAgIGlmICgocmVzdWx0ID0gc2NhbkZvcklTTyhwYXRoLCBTQ0VDZFBTMkRWRCwgJmRsaXN0X2hlYWQpKSA+PSAwKSB7CiAgICAgICAgY291bnQgPSBjb3VudCA8IDAgPyByZXN1bHQgOiBjb3VudCArIHJlc3VsdDsKICAgIH0KJycnCmR2ZF9uZXcgPSBkdmRfYmxvY2sgKyAnJycKICAgIGlmIChzY2FuUFMxVkNEcykgewogICAgICAgIHNucHJpbnRmKHBhdGgsIHNpemVvZihwYXRoKSwgIiVzUE9QUyIsIHByZWZpeCk7CiAgICAgICAgcmVzdWx0ID0gc2NhbkZvclBTMVZDRChwYXRoLCAmZGxpc3RfaGVhZCk7CiAgICAgICAgaWYgKHJlc3VsdCA+PSAwKQogICAgICAgICAgICBjb3VudCA9IGNvdW50IDwgMCA/IHJlc3VsdCA6IGNvdW50ICsgcmVzdWx0OwogICAgfQonJycKcyA9IHJlcChzLCBkdmRfYmxvY2ssIGR2ZF9uZXcsICJEVkQgc2NhbiBibG9jayIpCgpvbGRfY2FzZSA9ICcnJyAgICAgICAgY2FzZSBHQU1FX0ZPUk1BVF9PTERfSVNPOgogICAgICAgICAgICBzbnByaW50ZihwYXRoLCAyNTYsICIlcyVzJXMlcy4lcyVzIiwgcHJlZml4LCAoZ2FtZS0+bWVkaWEgPT0gU0NFQ2RQUzJDRCkgPyAiQ0QiIDogIkRWRCIsIHNlcCwgZ2FtZS0+c3RhcnR1cCwgZ2FtZV9uYW1lLCBnYW1lLT5leHRlbnNpb24pOwogICAgICAgICAgICBicmVhazsKJycnCm5ld19jYXNlID0gb2xkX2Nhc2UgKyAnJycgICAgICAgIGNhc2UgR0FNRV9GT1JNQVRfUFMxX1ZDRDoKICAgICAgICAgICAgc25wcmludGYocGF0aCwgMjU2LCAiJXNQT1BTJXMlcyVzIiwgcHJlZml4LCBzZXAsIGdhbWVfbmFtZSwgZ2FtZS0+ZXh0ZW5zaW9uKTsKICAgICAgICAgICAgYnJlYWs7CicnJwpzID0gcmVwKHMsIG9sZF9jYXNlLCBuZXdfY2FzZSwgIlBTMSBwYXRoIGNhc2UiKQoKb2xkX3NpemUgPSAnJycgICAgICAgIHNucHJpbnRmKGdhbWVwYXRoLCBzaXplb2YoZ2FtZXBhdGgpLCAiJXMlcyVzJXMlcyVzIiwgcHJlZml4LCBzZXAsIGdhbWUtPm1lZGlhID09IFNDRUNkUFMyQ0QgPyAiQ0QiIDogIkRWRCIsIHNlcCwgZ2FtZS0+bmFtZSwgZ2FtZS0+ZXh0ZW5zaW9uKTsKJycnCm5ld19zaXplID0gJycnICAgICAgICBpZiAoZ2FtZS0+Zm9ybWF0ID09IEdBTUVfRk9STUFUX1BTMV9WQ0QpCiAgICAgICAgICAgIHNucHJpbnRmKGdhbWVwYXRoLCBzaXplb2YoZ2FtZXBhdGgpLCAiJXNQT1BTJXMlcyVzIiwgcHJlZml4LCBzZXAsIGdhbWUtPm5hbWUsIGdhbWUtPmV4dGVuc2lvbik7CiAgICAgICAgZWxzZQogICAgICAgICAgICBzbnByaW50ZihnYW1lcGF0aCwgc2l6ZW9mKGdhbWVwYXRoKSwgIiVzJXMlcyVzJXMlcyIsIHByZWZpeCwgc2VwLCBnYW1lLT5tZWRpYSA9PSBTQ0VDZFBTMkNEID8gIkNEIiA6ICJEVkQiLCBzZXAsIGdhbWUtPm5hbWUsIGdhbWUtPmV4dGVuc2lvbik7CicnJwpzID0gcmVwKHMsIG9sZF9zaXplLCBuZXdfc2l6ZSwgImNvbmZpZyBzaXplIHBhdGgiKQoKb2xkX2ZtdCA9ICcnJyAgICBpZiAoZ2FtZS0+Zm9ybWF0ICE9IEdBTUVfRk9STUFUX1VTQkxEKSB7CiAgICAgICAgaWYgKCFzdHJjbXAoZ2FtZS0+ZXh0ZW5zaW9uLCAiLmlzbyIpKQogICAgICAgICAgICBjb25maWdTZXRTdHIoY29uZmlnLCBDT05GSUdfSVRFTV9GT1JNQVQsICJJU08iKTsKICAgICAgICBlbHNlIGlmICghc3RyY21wKGdhbWUtPmV4dGVuc2lvbiwgIi56c28iKSkKICAgICAgICAgICAgY29uZmlnU2V0U3RyKGNvbmZpZywgQ09ORklHX0lURU1fRk9STUFULCAiWlNPIik7CiAgICB9IGVsc2UgaWYgKGdhbWUtPmZvcm1hdCA9PSBHQU1FX0ZPUk1BVF9VU0JMRCkKICAgICAgICBjb25maWdTZXRTdHIoY29uZmlnLCBDT05GSUdfSVRFTV9GT1JNQVQsICJVTCIpOwoKICAgIGNvbmZpZ1NldFN0cihjb25maWcsIENPTkZJR19JVEVNX01FRElBLCBnYW1lLT5tZWRpYSA9PSBTQ0VDZFBTMkNEID8gIkNEIiA6ICJEVkQiKTsKJycnCm5ld19mbXQgPSAnJycgICAgaWYgKGdhbWUtPmZvcm1hdCA9PSBHQU1FX0ZPUk1BVF9QUzFfVkNEKSB7CiAgICAgICAgY29uZmlnU2V0U3RyKGNvbmZpZywgQ09ORklHX0lURU1fRk9STUFULCAiVkNEIik7CiAgICAgICAgY29uZmlnU2V0U3RyKGNvbmZpZywgQ09ORklHX0lURU1fTUVESUEsICJQUzEiKTsKICAgIH0gZWxzZSB7CiAgICAgICAgaWYgKGdhbWUtPmZvcm1hdCAhPSBHQU1FX0ZPUk1BVF9VU0JMRCkgewogICAgICAgICAgICBpZiAoIXN0cmNtcChnYW1lLT5leHRlbnNpb24sICIuaXNvIikpCiAgICAgICAgICAgICAgICBjb25maWdTZXRTdHIoY29uZmlnLCBDT05GSUdfSVRFTV9GT1JNQVQsICJJU08iKTsKICAgICAgICAgICAgZWxzZSBpZiAoIXN0cmNtcChnYW1lLT5leHRlbnNpb24sICIuenNvIikpCiAgICAgICAgICAgICAgICBjb25maWdTZXRTdHIoY29uZmlnLCBDT05GSUdfSVRFTV9GT1JNQVQsICJaU08iKTsKICAgICAgICB9IGVsc2UgewogICAgICAgICAgICBjb25maWdTZXRTdHIoY29uZmlnLCBDT05GSUdfSVRFTV9GT1JNQVQsICJVTCIpOwogICAgICAgIH0KCiAgICAgICAgY29uZmlnU2V0U3RyKGNvbmZpZywgQ09ORklHX0lURU1fTUVESUEsIGdhbWUtPm1lZGlhID09IFNDRUNkUFMyQ0QgPyAiQ0QiIDogIkRWRCIpOwogICAgfQonJycKcyA9IHJlcChzLCBvbGRfZm10LCBuZXdfZm10LCAiY29uZmlnIGZvcm1hdCIpCndyaXRlKHAsIHMpCgojIHNyYy9ldGhzdXBwb3J0LmMKcCA9ICJzcmMvZXRoc3VwcG9ydC5jIgpzID0gcmVhZChwKQpzID0gcmVwKAogICAgcywKICAgICJzYlJlYWRMaXN0KCZldGhHYW1lcywgZXRoUHJlZml4LCAmZXRoVUxTaXplUHJldiwgJmV0aEdhbWVDb3VudCkiLAogICAgInNiUmVhZExpc3QoJmV0aEdhbWVzLCBldGhQcmVmaXgsICZldGhVTFNpemVQcmV2LCAmZXRoR2FtZUNvdW50LCAwKSIsCiAgICAiRVRIIHNiUmVhZExpc3QgY2FsbCIsCikKd3JpdGUocCwgcykKCiMgc3JjL2JkbXN1cHBvcnQuYwpwID0gInNyYy9iZG1zdXBwb3J0LmMiCnMgPSByZWFkKHApCnMgPSByZXAoCiAgICBzLAogICAgInNiUmVhZExpc3QoJnBEZXZpY2VEYXRhLT5iZG1HYW1lcywgcERldmljZURhdGEtPmJkbVByZWZpeCwgJnBEZXZpY2VEYXRhLT5iZG1VTFNpemVQcmV2LCAmcERldmljZURhdGEtPmJkbUdhbWVDb3VudCkiLAogICAgInNiUmVhZExpc3QoJnBEZXZpY2VEYXRhLT5iZG1HYW1lcywgcERldmljZURhdGEtPmJkbVByZWZpeCwgJnBEZXZpY2VEYXRhLT5iZG1VTFNpemVQcmV2LCAmcERldmljZURhdGEtPmJkbUdhbWVDb3VudCwgIXN0cmNtcChwRGV2aWNlRGF0YS0+YmRtRHJpdmVyLCBcInVzYlwiKSkiLAogICAgIkJETSBzYlJlYWRMaXN0IGNhbGwiLAopCgpsYXVuY2hfbWFya2VyID0gJycnICAgIH0gZWxzZSB7CiAgICAgICAgcERldmljZURhdGEgPSBnQXV0b0xhdW5jaERldmljZURhdGE7CiAgICAgICAgZ2FtZSA9IGdBdXRvTGF1bmNoQkRNR2FtZTsKICAgIH0KCgogICAgY2hhciB2bWNfbmFtZVszMl0sIHZtY19wYXRoWzI1Nl0sIGhhdmVfZXJyb3IgPSAwOwonJycKbGF1bmNoX25ldyA9ICcnJyAgICB9IGVsc2UgewogICAgICAgIHBEZXZpY2VEYXRhID0gZ0F1dG9MYXVuY2hEZXZpY2VEYXRhOwogICAgICAgIGdhbWUgPSBnQXV0b0xhdW5jaEJETUdhbWU7CiAgICB9CgogICAgaWYgKGdhbWUtPmZvcm1hdCA9PSBHQU1FX0ZPUk1BVF9QUzFfVkNEKSB7CiAgICAgICAgY2hhciBwb3BzTG9hZGVyUGF0aFsyNTZdOwogICAgICAgIGNoYXIgZ2FtZUFyZ1tJU09fR0FNRV9OQU1FX01BWCArIElTT19HQU1FX0VYVEVOU0lPTl9NQVggKyAxNl07CiAgICAgICAgY29uc3QgY2hhciAqYXJnc1syXTsKCiAgICAgICAgaWYgKHN0cmNtcChwRGV2aWNlRGF0YS0+YmRtRHJpdmVyLCAidXNiIikgIT0gMCkgewogICAgICAgICAgICBndWlNc2dCb3goIlBTMSBWQ0QgdGVzdCBzdXBwb3J0cyBVU0Igb25seS4iLCAwLCBOVUxMKTsKICAgICAgICAgICAgcmV0dXJuOwogICAgICAgIH0KCiAgICAgICAgc25wcmludGYocG9wc0xvYWRlclBhdGgsIHNpemVvZihwb3BzTG9hZGVyUGF0aCksICIlc0FQUFMvUE9QU0xPQURFUi5FTEYiLCBwRGV2aWNlRGF0YS0+YmRtUHJlZml4KTsKICAgICAgICBzbnByaW50ZihnYW1lQXJnLCBzaXplb2YoZ2FtZUFyZyksICItZ2FtZT0lcyVzIiwgZ2FtZS0+bmFtZSwgZ2FtZS0+ZXh0ZW5zaW9uKTsKCiAgICAgICAgYXJnc1swXSA9ICItcGFnZT11c2IiOwogICAgICAgIGFyZ3NbMV0gPSBnYW1lQXJnOwoKICAgICAgICBpZiAoc3lzRXhlY0VsZldpdGhBcmdzKHBvcHNMb2FkZXJQYXRoLCAyLCBhcmdzKSA8IDApCiAgICAgICAgICAgIGd1aU1zZ0JveCgiQ291bGQgbm90IGxhdW5jaCBBUFBTL1BPUFNMT0FERVIuRUxGLiIsIDAsIE5VTEwpOwogICAgICAgIHJldHVybjsKICAgIH0KCiAgICBjaGFyIHZtY19uYW1lWzMyXSwgdm1jX3BhdGhbMjU2XSwgaGF2ZV9lcnJvciA9IDA7CicnJwpzID0gcmVwKHMsIGxhdW5jaF9tYXJrZXIsIGxhdW5jaF9uZXcsICJQUzEgbGF1bmNoIGJyYW5jaCIpCndyaXRlKHAsIHMpCgoKIyBzcmMvdGhlbWVzLmM6IFBTMSBsYWJlbCArIGFydHdvcmsgbG9va3VwIGJ5IFZDRCBiYXNlbmFtZQpwID0gInNyYy90aGVtZXMuYyIKcyA9IHJlYWQocCkKCmhlbHBlcl9hbmNob3IgPSAnJydzdGF0aWMgaW50IHRoZW1lR2FtZUl0ZW1Jc0F2YWlsYWJsZSh2b2lkICpmYWxsYmFja1N1cHBvcnQsIGludCBpdGVtSWQpCicnJwpoZWxwZXJfY29kZSA9ICcnJ3N0YXRpYyBpbnQgcHM1R2FtZUlzUFMxVkNEKGl0ZW1fbGlzdF90ICpzdXBwb3J0LCBpbnQgc291cmNlSWQpCnsKICAgIGJhc2VfZ2FtZV9pbmZvX3QgKmdhbWU7CgogICAgaWYgKHN1cHBvcnQgPT0gTlVMTCB8fCBzb3VyY2VJZCA8IDAgfHwgc3VwcG9ydC0+aXRlbUdldCA9PSBOVUxMKQogICAgICAgIHJldHVybiAwOwoKICAgIGdhbWUgPSAoYmFzZV9nYW1lX2luZm9fdCAqKXN1cHBvcnQtPml0ZW1HZXQoc3VwcG9ydCwgc291cmNlSWQpOwogICAgcmV0dXJuIGdhbWUgIT0gTlVMTCAmJiBnYW1lLT5mb3JtYXQgPT0gR0FNRV9GT1JNQVRfUFMxX1ZDRDsKfQoKJycnCmlmIGhlbHBlcl9jb2RlIG5vdCBpbiBzOgogICAgaWYgaGVscGVyX2FuY2hvciBub3QgaW4gczoKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KCJ0aGVtZXMgaGVscGVyIGFuY2hvciBub3QgZm91bmQiKQogICAgcyA9IHMucmVwbGFjZShoZWxwZXJfYW5jaG9yLCBoZWxwZXJfY29kZSArIGhlbHBlcl9hbmNob3IsIDEpCgphcnRfb2xkID0gJycnICAgICAgICBpZiAobGlzdC0+aXRlbUdldFN0YXJ0dXApCiAgICAgICAgICAgIHN0YXJ0dXAgPSBsaXN0LT5pdGVtR2V0U3RhcnR1cChsaXN0LCBzb3VyY2VJZCk7CicnJwphcnRfbmV3ID0gJycnICAgICAgICBpZiAobGlzdC0+aXRlbUdldFN0YXJ0dXApCiAgICAgICAgICAgIHN0YXJ0dXAgPSBsaXN0LT5pdGVtR2V0U3RhcnR1cChsaXN0LCBzb3VyY2VJZCk7CiAgICAgICAgaWYgKHBzNUdhbWVJc1BTMVZDRChsaXN0LCBzb3VyY2VJZCkpIHsKICAgICAgICAgICAgYmFzZV9nYW1lX2luZm9fdCAqcHMxR2FtZSA9IChiYXNlX2dhbWVfaW5mb190ICopbGlzdC0+aXRlbUdldChsaXN0LCBzb3VyY2VJZCk7CiAgICAgICAgICAgIGlmIChwczFHYW1lICE9IE5VTEwpCiAgICAgICAgICAgICAgICBzdGFydHVwID0gcHMxR2FtZS0+bmFtZTsKICAgICAgICB9CicnJwppZiBhcnRfb2xkIG5vdCBpbiBzOgogICAgcmFpc2UgU3lzdGVtRXhpdCgidGhlbWVzIFBTMSBhcnR3b3JrIGFuY2hvciBub3QgZm91bmQiKQpzID0gcy5yZXBsYWNlKGFydF9vbGQsIGFydF9uZXcsIDEpCgpsYWJlbF9vbGQgPSAnJycgICAgICAgICAgICAgICAgZm50UmVuZGVyU3RyaW5nKGdQUzVSZWdGb250LCA1MCwgMzU0LCBBTElHTl9MRUZULCAwLCAwLCBnZXRHYW1lRGV2ZWxvcGVyKHN0YXJ0dXAsIGZ1bGxUaXRsZSksIEdTX1NFVFJFR19SR0JBKDB4NTgsIDB4NTgsIDB4NTgsIDB4NTYpKTsKJycnCmxhYmVsX25ldyA9ICcnJyAgICAgICAgICAgICAgICBjb25zdCBjaGFyICpwbGF0Zm9ybVRleHQgPSBwczVHYW1lSXNQUzFWQ0Qoc3VwcG9ydCwgc291cmNlSWQpID8gIlBsYXlTdGF0aW9uIiA6IGdldEdhbWVEZXZlbG9wZXIoc3RhcnR1cCwgZnVsbFRpdGxlKTsKICAgICAgICAgICAgICAgIGZudFJlbmRlclN0cmluZyhnUFM1UmVnRm9udCwgNTAsIDM1NCwgQUxJR05fTEVGVCwgMCwgMCwgcGxhdGZvcm1UZXh0LCBHU19TRVRSRUdfUkdCQSgweDU4LCAweDU4LCAweDU4LCAweDU2KSk7CicnJwppZiBsYWJlbF9vbGQgbm90IGluIHM6CiAgICByYWlzZSBTeXN0ZW1FeGl0KCJ0aGVtZXMgUFMxIHBsYXRmb3JtIGxhYmVsIGFuY2hvciBub3QgZm91bmQiKQpzID0gcy5yZXBsYWNlKGxhYmVsX29sZCwgbGFiZWxfbmV3LCAxKQoKd3JpdGUocCwgcykKCnByaW50KCJQUzEgVVNCIHNvdXJjZSBlZGl0cyBhcHBsaWVkIHN1Y2Nlc3NmdWxseS4iKQo=' | base64 -d > /tmp/ps1edit.py
-          python3 -m py_compile /tmp/ps1edit.py
-          python3 /tmp/ps1edit.py
-          echo 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCgpwID0gUGF0aCgic3JjL3NyYy90aGVtZXMuYyIpCnMgPSBwLnJlYWRfdGV4dCgpCgpkZWYgcmVwbGFjZV9vbmNlKHRleHQsIG9sZCwgbmV3LCBsYWJlbCk6CiAgICBuID0gdGV4dC5jb3VudChvbGQpCiAgICBpZiBuICE9IDE6CiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdChmIntsYWJlbH06IGV4cGVjdGVkIDEgbWF0Y2gsIGZvdW5kIHtufSIpCiAgICByZXR1cm4gdGV4dC5yZXBsYWNlKG9sZCwgbmV3LCAxKQoKZm5fbWFya2VyID0gInN0YXRpYyBuZXRfcmVxX3QgKnByZXBhcmVQUzVDYXJvdXNlbENhcmRNZWRpYSgiCmZuX3N0YXJ0ID0gcy5maW5kKGZuX21hcmtlcikKaWYgZm5fc3RhcnQgPCAwOgogICAgcmFpc2UgU3lzdGVtRXhpdCgicHJlcGFyZVBTNUNhcm91c2VsQ2FyZE1lZGlhIG5vdCBmb3VuZCIpCmZuX2VuZCA9IHMuZmluZCgiXG5zdGF0aWMgdm9pZCBnZXRHYW1lQ29sb3JzKCIsIGZuX3N0YXJ0KQppZiBmbl9lbmQgPCAwOgogICAgcmFpc2UgU3lzdGVtRXhpdCgicHJlcGFyZVBTNUNhcm91c2VsQ2FyZE1lZGlhIGVuZCBub3QgZm91bmQiKQoKZm4gPSBzW2ZuX3N0YXJ0OmZuX2VuZF0KYXJ0X29sZCA9ICIgICAgICAgIGlmIChsaXN0LT5pdGVtR2V0U3RhcnR1cClcbiAgICAgICAgICAgIHN0YXJ0dXAgPSBsaXN0LT5pdGVtR2V0U3RhcnR1cChsaXN0LCBzb3VyY2VJZCk7XG4iCmFydF9uZXcgPSAoCiAgICAiICAgICAgICBpZiAobGlzdC0+aXRlbUdldFN0YXJ0dXApXG4iCiAgICAiICAgICAgICAgICAgc3RhcnR1cCA9IGxpc3QtPml0ZW1HZXRTdGFydHVwKGxpc3QsIHNvdXJjZUlkKTtcbiIKICAgICIgICAgICAgIGlmIChwczVHYW1lSXNQUzFWQ0QobGlzdCwgc291cmNlSWQpKSB7XG4iCiAgICAiICAgICAgICAgICAgYmFzZV9nYW1lX2luZm9fdCAqcHMxR2FtZSA9IChiYXNlX2dhbWVfaW5mb190ICopbGlzdC0+aXRlbUdldChsaXN0LCBzb3VyY2VJZCk7XG4iCiAgICAiICAgICAgICAgICAgaWYgKHBzMUdhbWUgIT0gTlVMTClcbiIKICAgICIgICAgICAgICAgICAgICAgc3RhcnR1cCA9IHBzMUdhbWUtPm5hbWU7XG4iCiAgICAiICAgICAgICB9XG4iCikKaWYgYXJ0X25ldyBub3QgaW4gZm46CiAgICBpZiBhcnRfb2xkIG5vdCBpbiBmbjoKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KCJQUzUgYXJ0d29yayBrZXkgYW5jaG9yIG5vdCBmb3VuZCIpCiAgICBmbiA9IGZuLnJlcGxhY2UoYXJ0X29sZCwgYXJ0X25ldywgMSkKICAgIHMgPSBzWzpmbl9zdGFydF0gKyBmbiArIHNbZm5fZW5kOl0KCnRyaWdnZXJfYW5jaG9yID0gInN0YXRpYyB2b2lkIHRyaWdnZXJOZXRGZXRjaChjb25zdCBjaGFyICp0aXRsZSwgY29uc3QgY2hhciAqc3RhcnR1cCwgY29uc3QgY2hhciAqZGV2aWNlUHJlZml4LCBpbnQgYWxsb3dEZXZpY2VQcm9iZSkge1xuIgpwcm9iZV9oZWxwZXIgPSAnJydzdGF0aWMgaW50IHBzNVRyeUxvY2FsQ292ZXIoY2hhciAqb3V0LCBpbnQgb3V0TGVuLCBjb25zdCBjaGFyICpwcmVmaXgsIGNvbnN0IGNoYXIgKmtleSkKewogICAgc3RhdGljIGNvbnN0IGNoYXIgKmV4dHNbXSA9IHsiLnBuZyIsICIuanBnIiwgIi5qcGVnIiwgIi5QTkciLCAiLkpQRyIsICIuSlBFRyJ9OwogICAgY2hhciBwYXRoWzI1Nl07CiAgICBpbnQgaTsKCiAgICBpZiAob3V0ID09IE5VTEwgfHwgb3V0TGVuIDw9IDAgfHwgcHJlZml4ID09IE5VTEwgfHwgcHJlZml4WzBdID09ICdcXDAnIHx8IGtleSA9PSBOVUxMIHx8IGtleVswXSA9PSAnXFwwJykKICAgICAgICByZXR1cm4gMDsKCiAgICBmb3IgKGkgPSAwOyBpIDwgKGludCkoc2l6ZW9mKGV4dHMpIC8gc2l6ZW9mKGV4dHNbMF0pKTsgaSsrKSB7CiAgICAgICAgaW50IGZkOwogICAgICAgIHNucHJpbnRmKHBhdGgsIHNpemVvZihwYXRoKSwgIiVzL0FSVC8lc19DT1YlcyIsIHByZWZpeCwga2V5LCBleHRzW2ldKTsKICAgICAgICBmZCA9IGRlYnVnT3BlblByb2JlKHBhdGgpOwogICAgICAgIGlmIChmZCA+PSAwKSB7CiAgICAgICAgICAgIGNsb3NlKGZkKTsKICAgICAgICAgICAgc3RybmNweShvdXQsIHBhdGgsIG91dExlbiAtIDEpOwogICAgICAgICAgICBvdXRbb3V0TGVuIC0gMV0gPSAnXFwwJzsKICAgICAgICAgICAgcmV0dXJuIDE7CiAgICAgICAgfQogICAgfQoKICAgIHJldHVybiAwOwp9CgonJycKaWYgInN0YXRpYyBpbnQgcHM1VHJ5TG9jYWxDb3ZlcigiIG5vdCBpbiBzOgogICAgaWYgdHJpZ2dlcl9hbmNob3Igbm90IGluIHM6CiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgidHJpZ2dlck5ldEZldGNoIGFuY2hvciBub3QgZm91bmQiKQogICAgcyA9IHMucmVwbGFjZSh0cmlnZ2VyX2FuY2hvciwgcHJvYmVfaGVscGVyICsgdHJpZ2dlcl9hbmNob3IsIDEpCgpvbGRfY292ZXIgPSAnJycgICAgbWF0Y2hlZFBhdGhbMF0gPSAnXFwwJzsKICAgIGlmIChhbGxvd0RldmljZVByb2JlICYmIHN0YXJ0dXAgJiYgc3RhcnR1cFswXSAhPSAnXFwwJykgewogICAgICAgIGNoYXIgcHJlZml4WzEyOF07CiAgICAgICAgaWYgKGRldmljZVByZWZpeCAmJiBkZXZpY2VQcmVmaXhbMF0gIT0gJ1xcMCcpIHsKICAgICAgICAgICAgc3RybmNweShwcmVmaXgsIGRldmljZVByZWZpeCwgc2l6ZW9mKHByZWZpeCkgLSAxKTsKICAgICAgICAgICAgcHJlZml4W3NpemVvZihwcmVmaXgpIC0gMV0gPSAnXFwwJzsKICAgICAgICAgICAgaW50IGxlbiA9IHN0cmxlbihwcmVmaXgpOwogICAgICAgICAgICBpZiAobGVuID4gMCAmJiBwcmVmaXhbbGVuIC0gMV0gPT0gJy8nKQogICAgICAgICAgICAgICAgcHJlZml4W2xlbiAtIDFdID0gJ1xcMCc7CiAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgc3RyY3B5KHByZWZpeCwgIm1hc3MwOiIpOwogICAgICAgIH0KICAgICAgICBzbnByaW50ZihtYXRjaGVkUGF0aCwgc2l6ZW9mKG1hdGNoZWRQYXRoKSwgIiVzL0FSVC8lc19DT1YucG5nIiwgcHJlZml4LCBzdGFydHVwKTsKICAgIH0KICAgIGlmIChtYXRjaGVkUGF0aFswXSA9PSAnXFwwJykgewogICAgICAgIGZpbmRCdWlsdEluQ292ZXJGb3JHYW1lKHRpdGxlLCBtYXRjaGVkUGF0aCwgc2l6ZW9mKG1hdGNoZWRQYXRoKSk7CiAgICB9CicnJwpuZXdfY292ZXIgPSAnJycgICAgbWF0Y2hlZFBhdGhbMF0gPSAnXFwwJzsKICAgIGlmIChhbGxvd0RldmljZVByb2JlKSB7CiAgICAgICAgY2hhciBwcmVmaXhbMTI4XTsKICAgICAgICBpZiAoZGV2aWNlUHJlZml4ICYmIGRldmljZVByZWZpeFswXSAhPSAnXFwwJykgewogICAgICAgICAgICBzdHJuY3B5KHByZWZpeCwgZGV2aWNlUHJlZml4LCBzaXplb2YocHJlZml4KSAtIDEpOwogICAgICAgICAgICBwcmVmaXhbc2l6ZW9mKHByZWZpeCkgLSAxXSA9ICdcXDAnOwogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICBpbnQgbGVuID0gc3RybGVuKHByZWZpeCk7CiAgICAgICAgICAgICAgICBpZiAobGVuID4gMCAmJiBwcmVmaXhbbGVuIC0gMV0gPT0gJy8nKQogICAgICAgICAgICAgICAgICAgIHByZWZpeFtsZW4gLSAxXSA9ICdcXDAnOwogICAgICAgICAgICB9CiAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgc3RyY3B5KHByZWZpeCwgIm1hc3MwOiIpOwogICAgICAgIH0KCiAgICAgICAgaWYgKHN0YXJ0dXAgJiYgc3RhcnR1cFswXSAhPSAnXFwwJykKICAgICAgICAgICAgcHM1VHJ5TG9jYWxDb3ZlcihtYXRjaGVkUGF0aCwgc2l6ZW9mKG1hdGNoZWRQYXRoKSwgcHJlZml4LCBzdGFydHVwKTsKICAgICAgICBpZiAobWF0Y2hlZFBhdGhbMF0gPT0gJ1xcMCcgJiYgdGl0bGUgJiYgdGl0bGVbMF0gIT0gJ1xcMCcpCiAgICAgICAgICAgIHBzNVRyeUxvY2FsQ292ZXIobWF0Y2hlZFBhdGgsIHNpemVvZihtYXRjaGVkUGF0aCksIHByZWZpeCwgdGl0bGUpOwogICAgfQogICAgaWYgKG1hdGNoZWRQYXRoWzBdID09ICdcXDAnKSB7CiAgICAgICAgZmluZEJ1aWx0SW5Db3ZlckZvckdhbWUodGl0bGUsIG1hdGNoZWRQYXRoLCBzaXplb2YobWF0Y2hlZFBhdGgpKTsKICAgIH0KJycnCnMgPSByZXBsYWNlX29uY2Uocywgb2xkX2NvdmVyLCBuZXdfY292ZXIsICJjb3ZlciBsb29rdXAiKQoKY2xhc3NpY19hbmNob3IgPSAiLy8gU3RhdGljSW1hZ2UgLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLy9cbiIKY2xhc3NpY19iZyA9ICcnJ3N0YXRpYyB2b2lkIGRyYXdQUzJDbGFzc2ljQmFja2dyb3VuZCh2b2lkKQp7CiAgICBzdGF0aWMgdW5zaWduZWQgaW50IGZyYW1lID0gMDsKICAgIHN0YXRpYyBjb25zdCB1bnNpZ25lZCBzaG9ydCB0b3dlclhbMTRdID0gezI2LCA3MiwgMTE4LCAxNjgsIDIxNCwgMjY2LCAzMTQsIDM2NiwgNDE0LCA0NjIsIDUxMCwgNTUwLCA1OTAsIDYyMH07CiAgICBzdGF0aWMgY29uc3QgdW5zaWduZWQgY2hhciB0b3dlcldbMTRdID0gezE4LCAyOCwgMTQsIDM0LCAyMCwgMjYsIDE2LCAzMiwgMjIsIDE4LCAyOCwgMTYsIDIyLCAxMn07CiAgICBpbnQgaTsKCiAgICBmcmFtZSsrOwoKICAgIGZvciAoaSA9IDA7IGkgPCAxNjsgaSsrKSB7CiAgICAgICAgaW50IHkgPSBpICogMzA7CiAgICAgICAgaW50IGIgPSAzNiArIGkgKiA3OwogICAgICAgIGludCBnID0gMTggKyBpICogNTsKICAgICAgICBpZiAoYiA+IDE1MCkgYiA9IDE1MDsKICAgICAgICBpZiAoZyA+IDkyKSBnID0gOTI7CiAgICAgICAgcm1EcmF3UmVjdCgwLCB5LCA2NDAsIDMxLCBHU19TRVRSRUdfUkdCQSgweDAzLCBnLCBiLCAweDgwKSk7CiAgICB9CgogICAgcm1EcmF3UmVjdCgwLCAzMDAsIDY0MCwgMTgwLCBHU19TRVRSRUdfUkdCQSgweDAwLCAweDI4LCAweDcwLCAweDM0KSk7CiAgICBybURyYXdSZWN0KDAsIDM5MCwgNjQwLCA5MCwgR1NfU0VUUkVHX1JHQkEoMHgwMCwgMHg0NSwgMHhBMCwgMHgyNCkpOwoKICAgIGZvciAoaSA9IDA7IGkgPCAxNDsgaSsrKSB7CiAgICAgICAgdW5zaWduZWQgaW50IHBoYXNlID0gZnJhbWUgKyAodW5zaWduZWQgaW50KShpICogMzcpOwogICAgICAgIGludCBkcmlmdCA9IChpbnQpKChwaGFzZSAvIDUpICUgMTkpIC0gOTsKICAgICAgICBpbnQgeSA9IDcyICsgKGludCkoKHBoYXNlICogKDEgKyAoaSAlIDMpKSkgJSAzMzApOwogICAgICAgIGludCBoID0gMzQgKyAoKGkgKiAyMykgJSAxMTgpOwogICAgICAgIGludCB3ID0gdG93ZXJXW2ldOwogICAgICAgIGludCB4ID0gKGludCl0b3dlclhbaV0gKyBkcmlmdDsKICAgICAgICBpbnQgZ2xvd1cgPSB3ICsgODsKICAgICAgICBpbnQgYWxwaGEgPSAweDI4ICsgKGkgJSA0KSAqIDg7CgogICAgICAgIGlmICh5ICsgaCA+IDQ1NCkKICAgICAgICAgICAgaCA9IDQ1NCAtIHk7CiAgICAgICAgaWYgKGggPCAxOCkKICAgICAgICAgICAgaCA9IDE4OwoKICAgICAgICBybURyYXdSZWN0KHggLSA0LCB5IC0gNCwgZ2xvd1csIGggKyA4LCBHU19TRVRSRUdfUkdCQSgweDE4LCAweDRDLCAweEE4LCAweDE2KSk7CiAgICAgICAgcm1EcmF3UmVjdCh4LCB5LCB3LCBoLCBHU19TRVRSRUdfUkdCQSgweDVBLCAweDgyLCAweEM4LCBhbHBoYSkpOwogICAgICAgIHJtRHJhd0xpbmUoeCwgeSwgeCArIHcsIHksIEdTX1NFVFJFR19SR0JBKDB4QjAsIDB4Q0IsIDB4RkYsIDB4MzUpKTsKICAgICAgICBybURyYXdMaW5lKHggKyB3LCB5LCB4ICsgdywgeSArIGgsIEdTX1NFVFJFR19SR0JBKDB4MjAsIDB4NDgsIDB4ODgsIDB4MzApKTsKICAgIH0KCiAgICBybURyYXdMaW5lKDM0LCA4NCwgNjA2LCA4NCwgR1NfU0VUUkVHX1JHQkEoMHg4QSwgMHhDRiwgMHhGRiwgMHgyMCkpOwogICAgcm1EcmF3TGluZSgzNCwgODYsIDYwNiwgODYsIEdTX1NFVFJFR19SR0JBKDB4MTQsIDB4NTYsIDB4QTgsIDB4MTgpKTsKfQoKJycnCmlmICJzdGF0aWMgdm9pZCBkcmF3UFMyQ2xhc3NpY0JhY2tncm91bmQodm9pZCkiIG5vdCBpbiBzOgogICAgaWYgY2xhc3NpY19hbmNob3Igbm90IGluIHM6CiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgiY2xhc3NpYyBiYWNrZ3JvdW5kIGFuY2hvciBub3QgZm91bmQiKQogICAgcyA9IHMucmVwbGFjZShjbGFzc2ljX2FuY2hvciwgY2xhc3NpY19iZyArIGNsYXNzaWNfYW5jaG9yLCAxKQoKcyA9IHMucmVwbGFjZSgKICAgICIgICAgICAgIGlmIChlbGVtLT50eXBlID09IEVMRU1fVFlQRV9CQUNLR1JPVU5EKSB7XG4gICAgICAgICAgICBndWlEcmF3QkdQbGFzbWEoKTtcbiAgICAgICAgfVxuIiwKICAgICIgICAgICAgIGlmIChlbGVtLT50eXBlID09IEVMRU1fVFlQRV9CQUNLR1JPVU5EKSB7XG4gICAgICAgICAgICBkcmF3UFMyQ2xhc3NpY0JhY2tncm91bmQoKTtcbiAgICAgICAgfVxuIgopCgptYWluX29sZCA9ICIgICAgICAgIGd1aURyYXdCR1BsYXNtYSgpO1xuXG4gICAgICAgIC8vIDIuIERyYXcgdGhlIHpvb21pbmcgY2FyZFxuIgptYWluX25ldyA9ICIgICAgICAgIGRyYXdQUzJDbGFzc2ljQmFja2dyb3VuZCgpO1xuXG4gICAgICAgIC8vIDIuIERyYXcgdGhlIHpvb21pbmcgY2FyZFxuIgppZiBtYWluX29sZCBpbiBzOgogICAgcyA9IHMucmVwbGFjZShtYWluX29sZCwgbWFpbl9uZXcsIDEpCgpkcmF3X2JnX29sZCA9ICgKICAgICJzdGF0aWMgdm9pZCBkcmF3QmFja2dyb3VuZChzdHJ1Y3QgbWVudV9saXN0ICptZW51LCBzdHJ1Y3Qgc3VibWVudV9saXN0ICppdGVtLCBjb25maWdfc2V0X3QgKmNvbmZpZywgc3RydWN0IHRoZW1lX2VsZW1lbnQgKmVsZW0pXG4iCiAgICAie1xuIgogICAgIiAgICBndWlEcmF3QkdQbGFzbWEoKTtcbiIKICAgICJ9XG4iCikKZHJhd19iZ19uZXcgPSAoCiAgICAic3RhdGljIHZvaWQgZHJhd0JhY2tncm91bmQoc3RydWN0IG1lbnVfbGlzdCAqbWVudSwgc3RydWN0IHN1Ym1lbnVfbGlzdCAqaXRlbSwgY29uZmlnX3NldF90ICpjb25maWcsIHN0cnVjdCB0aGVtZV9lbGVtZW50ICplbGVtKVxuIgogICAgIntcbiIKICAgICIgICAgaWYgKGdQUzVNb2RlKVxuIgogICAgIiAgICAgICAgZHJhd1BTMkNsYXNzaWNCYWNrZ3JvdW5kKCk7XG4iCiAgICAiICAgIGVsc2VcbiIKICAgICIgICAgICAgIGd1aURyYXdCR1BsYXNtYSgpO1xuIgogICAgIn1cbiIKKQppZiBkcmF3X2JnX29sZCBpbiBzOgogICAgcyA9IHMucmVwbGFjZShkcmF3X2JnX29sZCwgZHJhd19iZ19uZXcsIDEpCgpwLndyaXRlX3RleHQocykKcHJpbnQoInYxMiB2aXN1YWwvYXJ0d29yayBlZGl0cyBhcHBsaWVkIHN1Y2Nlc3NmdWxseSIpCg==' | base64 -d > /tmp/ps1v12_extra.py
-          python3 -m py_compile /tmp/ps1v12_extra.py
-          python3 /tmp/ps1v12_extra.py
           cd src
+          git apply <<'PATCH'
+          diff --git a/include/supportbase.h b/include/supportbase.h
+          index bd0d88f..9a27a80 100644
+          --- a/include/supportbase.h
+          +++ b/include/supportbase.h
+          @@ -12,6 +12,7 @@ enum GAME_FORMAT {
+               GAME_FORMAT_USBLD = 0,
+               GAME_FORMAT_OLD_ISO,
+               GAME_FORMAT_ISO,
+          +    GAME_FORMAT_PS1_VCD,
+           };
+           
+           typedef struct
+          @@ -40,7 +41,7 @@ typedef struct
+           int isValidIsoName(char *name, int *pNameLen);
+           int sbIsSameSize(const char *prefix, int prevSize);
+           int sbCreateSemaphore(void);
+          -int sbReadList(base_game_info_t **list, const char *prefix, int *fsize, int *gamecount);
+          +int sbReadList(base_game_info_t **list, const char *prefix, int *fsize, int *gamecount, int scanPS1VCDs);
+           int sbResolveISOStartup(base_game_info_t *game, const char *prefix, const char *sep);
+           int sbPrepare(base_game_info_t *game, config_set_t *configSet, int size_cdvdman, void **cdvdman_irx, int *patchindex);
+           void sbUnprepare(void *pCommon);
+          diff --git a/include/system.h b/include/system.h
+          index 2d9f8f1..050a9e1 100644
+          --- a/include/system.h
+          +++ b/include/system.h
+          @@ -21,6 +21,7 @@ int sysInitDECI2(void);
+           void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdvdman_irx, void **cdvdman_irx, int size_mcemu_irx, void **mcemu_irx, int EnablePS2Logo, unsigned int compatflags);
+           
+           int sysExecElf(const char *path);
+          +int sysExecElfWithArgs(const char *path, int extra_argc, const char *const extra_argv[]);
+           int sysLoadModuleBuffer(void *buffer, int size, int argc, char *argv);
+           int sysCheckMC(void);
+           int sysCheckVMC(const char *prefix, const char *sep, char *name, int createSize, vmc_superblock_t *vmc_superblock);
+          diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+          index d56afc3..f63a71b 100644
+          --- a/src/bdmsupport.c
+          +++ b/src/bdmsupport.c
+          @@ -428,7 +428,7 @@ static int bdmUpdateGameList(item_list_t *itemList)
+                   return 0;
+               }
+           
+          -    if (sbReadList(&pDeviceData->bdmGames, pDeviceData->bdmPrefix, &pDeviceData->bdmULSizePrev, &pDeviceData->bdmGameCount) < 0) {
+          +    if (sbReadList(&pDeviceData->bdmGames, pDeviceData->bdmPrefix, &pDeviceData->bdmULSizePrev, &pDeviceData->bdmGameCount, !strcmp(pDeviceData->bdmDriver, "usb")) < 0) {
+                   int retryFrames = BDM_RETRY_SCAN_FRAMES * (pDeviceData->bdmRetryCount + 1);
+                   if (pDeviceData->bdmRetryCount < 5)
+                       pDeviceData->bdmRetryCount++;
+          @@ -529,6 +529,26 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+                   game = gAutoLaunchBDMGame;
+               }
+           
+          +    if (game->format == GAME_FORMAT_PS1_VCD) {
+          +        char popsLoaderPath[256];
+          +        char gameArg[ISO_GAME_NAME_MAX + ISO_GAME_EXTENSION_MAX + 16];
+          +        const char *args[2];
+          +
+          +        if (strcmp(pDeviceData->bdmDriver, "usb") != 0) {
+          +            guiMsgBox("PS1 VCD test supports USB only.", 0, NULL);
+          +            return;
+          +        }
+          +
+          +        snprintf(popsLoaderPath, sizeof(popsLoaderPath), "%sAPPS/POPSLOADER.ELF", pDeviceData->bdmPrefix);
+          +        snprintf(gameArg, sizeof(gameArg), "-game=%s%s", game->name, game->extension);
+          +
+          +        args[0] = "-page=usb";
+          +        args[1] = gameArg;
+          +
+          +        if (sysExecElfWithArgs(popsLoaderPath, 2, args) < 0)
+          +            guiMsgBox("Could not launch APPS/POPSLOADER.ELF.", 0, NULL);
+          +        return;
+          +    }
+           
+               char vmc_name[32], vmc_path[256], have_error = 0;
+               int vmc_id, size_mcemu_irx = 0;
+          diff --git a/src/ethsupport.c b/src/ethsupport.c
+          index 9aec61e..78e66db 100644
+          --- a/src/ethsupport.c
+          +++ b/src/ethsupport.c
+          @@ -511,7 +511,7 @@ static int ethUpdateGameList(item_list_t *itemList)
+                   if (gNetworkStartup != 0)
+                       return 0;
+           
+          -        if ((sbReadList(&ethGames, ethPrefix, &ethULSizePrev, &ethGameCount)) < 0) {
+          +        if ((sbReadList(&ethGames, ethPrefix, &ethULSizePrev, &ethGameCount, 0)) < 0) {
+                       gNetworkStartup = ERROR_ETH_SMB_LISTGAMES;
+                       ethDisplayErrorStatus();
+                   }
+          diff --git a/src/supportbase.c b/src/supportbase.c
+          index acf7e75..186da00 100644
+          --- a/src/supportbase.c
+          +++ b/src/supportbase.c
+          @@ -377,7 +377,56 @@ static int scanForISO(char *path, char type, struct game_list_t **glist)
+               return count;
+           }
+           
+          -int sbReadList(base_game_info_t **list, const char *prefix, int *fsize, int *gamecount)
+          +
+          +static int scanForPS1VCD(const char *path, struct game_list_t **glist)
+          +{
+          +    int count = 0;
+          +    DIR *dir;
+          +    struct dirent *dirent;
+          +
+          +    dir = opendir(path);
+          +    if (dir == NULL)
+          +        return 0;
+          +
+          +    while ((dirent = readdir(dir)) != NULL) {
+          +        size_t len = strlen(dirent->d_name);
+          +        size_t nameLen;
+          +        struct game_list_t *next;
+          +        base_game_info_t *game;
+          +
+          +        if (len <= 4 || strcasecmp(&dirent->d_name[len - 4], ".VCD") != 0)
+          +            continue;
+          +
+          +        nameLen = len - 4;
+          +        if (nameLen == 0 || nameLen > ISO_GAME_NAME_MAX)
+          +            continue;
+          +
+          +        next = malloc(sizeof(struct game_list_t));
+          +        if (next == NULL)
+          +            break;
+          +
+          +        memset(next, 0, sizeof(struct game_list_t));
+          +        next->next = *glist;
+          +        *glist = next;
+          +        game = &next->gameinfo;
+          +
+          +        memcpy(game->name, dirent->d_name, nameLen);
+          +        game->name[nameLen] = '\0';
+          +        strcpy(game->extension, ".VCD");
+          +        snprintf(game->startup, sizeof(game->startup), "PS1%08X", USBA_crc32(dirent->d_name));
+          +
+          +        game->parts = 1;
+          +        game->media = SCECdPS2CD;
+          +        game->format = GAME_FORMAT_PS1_VCD;
+          +        game->sizeMB = 0;
+          +        count++;
+          +    }
+          +
+          +    closedir(dir);
+          +    return count;
+          +}
+          +
+          +int sbReadList(base_game_info_t **list, const char *prefix, int *fsize, int *gamecount, int scanPS1VCDs)
+           {
+               int fd, size, id = 0, result;
+               int count;
+          @@ -397,6 +446,13 @@ int sbReadList(base_game_info_t **list, const char *prefix, int *fsize, int *gam
+                   count = count < 0 ? result : count + result;
+               }
+           
+          +    if (scanPS1VCDs) {
+          +        snprintf(path, sizeof(path), "%sPOPS", prefix);
+          +        result = scanForPS1VCD(path, &dlist_head);
+          +        if (result >= 0)
+          +            count = count < 0 ? result : count + result;
+          +    }
+          +
+               // count and process games in ul.cfg
+               snprintf(path, sizeof(path), "%sul.cfg", prefix);
+               fd = openFile(path, O_RDONLY);
+          @@ -781,6 +837,9 @@ static void sbCreatePath_name(const base_game_info_t *game, char *path, const ch
+                   case GAME_FORMAT_OLD_ISO:
+                       snprintf(path, 256, "%s%s%s%s.%s%s", prefix, (game->media == SCECdPS2CD) ? "CD" : "DVD", sep, game->startup, game_name, game->extension);
+                       break;
+          +        case GAME_FORMAT_PS1_VCD:
+          +            snprintf(path, 256, "%sPOPS%s%s%s", prefix, sep, game_name, game->extension);
+          +            break;
+               }
+           }
+           
+          @@ -837,7 +896,10 @@ config_set_t *sbPopulateConfig(base_game_info_t *game, const char *prefix, const
+               if ((game->sizeMB == 0) && (game->format != GAME_FORMAT_OLD_ISO)) {
+                   char gamepath[256];
+           
+          -        snprintf(gamepath, sizeof(gamepath), "%s%s%s%s%s%s", prefix, sep, game->media == SCECdPS2CD ? "CD" : "DVD", sep, game->name, game->extension);
+          +        if (game->format == GAME_FORMAT_PS1_VCD)
+          +            snprintf(gamepath, sizeof(gamepath), "%sPOPS%s%s%s", prefix, sep, game->name, game->extension);
+          +        else
+          +            snprintf(gamepath, sizeof(gamepath), "%s%s%s%s%s%s", prefix, sep, game->media == SCECdPS2CD ? "CD" : "DVD", sep, game->name, game->extension);
+           
+                   if (stat(gamepath, &st) == 0)
+                       game->sizeMB = st.st_size >> 20;
+          @@ -848,15 +910,21 @@ config_set_t *sbPopulateConfig(base_game_info_t *game, const char *prefix, const
+               configSetStr(config, CONFIG_ITEM_NAME, game->name);
+               configSetInt(config, CONFIG_ITEM_SIZE, game->sizeMB);
+           
+          -    if (game->format != GAME_FORMAT_USBLD) {
+          -        if (!strcmp(game->extension, ".iso"))
+          -            configSetStr(config, CONFIG_ITEM_FORMAT, "ISO");
+          -        else if (!strcmp(game->extension, ".zso"))
+          -            configSetStr(config, CONFIG_ITEM_FORMAT, "ZSO");
+          -    } else if (game->format == GAME_FORMAT_USBLD)
+          -        configSetStr(config, CONFIG_ITEM_FORMAT, "UL");
+          +    if (game->format == GAME_FORMAT_PS1_VCD) {
+          +        configSetStr(config, CONFIG_ITEM_FORMAT, "VCD");
+          +        configSetStr(config, CONFIG_ITEM_MEDIA, "PS1");
+          +    } else {
+          +        if (game->format != GAME_FORMAT_USBLD) {
+          +            if (!strcmp(game->extension, ".iso"))
+          +                configSetStr(config, CONFIG_ITEM_FORMAT, "ISO");
+          +            else if (!strcmp(game->extension, ".zso"))
+          +                configSetStr(config, CONFIG_ITEM_FORMAT, "ZSO");
+          +        } else {
+          +            configSetStr(config, CONFIG_ITEM_FORMAT, "UL");
+          +        }
+           
+          -    configSetStr(config, CONFIG_ITEM_MEDIA, game->media == SCECdPS2CD ? "CD" : "DVD");
+          +        configSetStr(config, CONFIG_ITEM_MEDIA, game->media == SCECdPS2CD ? "CD" : "DVD");
+          +    }
+           
+               configSetStr(config, CONFIG_ITEM_STARTUP, game->startup);
+           
+          diff --git a/src/system.c b/src/system.c
+          index 94a319a..5a3a54c 100644
+          --- a/src/system.c
+          +++ b/src/system.c
+          @@ -1029,21 +1029,38 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
+               ExecPS2((void *)eh->entry, NULL, argc, argv);
+           }
+           
+          -int sysExecElf(const char *path)
+          +#define SYS_EXEC_MAX_EXTRA_ARGS 4
+          +#define SYS_EXEC_ARG_MAX 256
+          +
+          +int sysExecElfWithArgs(const char *path, int extra_argc, const char *const extra_argv[])
+           {
+          -    char *argv[1];
+          +    char *argv[1 + SYS_EXEC_MAX_EXTRA_ARGS];
+          +    char argStorage[SYS_EXEC_MAX_EXTRA_ARGS][SYS_EXEC_ARG_MAX];
+               char execPath[256];
+               t_ExecData elf;
+          -    int i;
+          +    int i, argc;
+           
+               if (path == NULL || path[0] == '\0')
+                   return -1;
+          +    if (extra_argc < 0 || extra_argc > SYS_EXEC_MAX_EXTRA_ARGS)
+          +        return -1;
+          +    if (extra_argc > 0 && extra_argv == NULL)
+          +        return -1;
+           
+               for (i = 0; i < (int)sizeof(execPath) - 1 && path[i] != '\0'; i++)
+                   execPath[i] = path[i];
+               execPath[i] = '\0';
+           
+               argv[0] = execPath;
+          +    argc = 1;
+          +
+          +    for (i = 0; i < extra_argc; i++) {
+          +        if (extra_argv[i] == NULL)
+          +            return -1;
+          +        strncpy(argStorage[i], extra_argv[i], SYS_EXEC_ARG_MAX - 1);
+          +        argStorage[i][SYS_EXEC_ARG_MAX - 1] = '\0';
+          +        argv[argc++] = argStorage[i];
+          +    }
+           
+               if (SifLoadElf(execPath, &elf) != 0)
+                   return -1;
+          @@ -1058,10 +1075,15 @@ int sysExecElf(const char *path)
+               SifExitIopHeap();
+               SifExitRpc();
+           
+          -    ExecPS2((void *)elf.epc, (void *)elf.gp, 1, argv);
+          +    ExecPS2((void *)elf.epc, (void *)elf.gp, argc, argv);
+               return 0;
+           }
+           
+          +int sysExecElf(const char *path)
+          +{
+          +    return sysExecElfWithArgs(path, 0, NULL);
+          +}
+          +
+           int sysCheckMC(void)
+           {
+               DIR *mc0_root_dir = opendir("mc0:/");
+          diff --git a/src/themes.c b/src/themes.c
+          index d2cfdae..dd35fa6 100644
+          --- a/src/themes.c
+          +++ b/src/themes.c
+          @@ -572,6 +572,20 @@ static int themeGameItemIsAvailable(void *fallbackSupport, int itemId)
+               return 1;
+           }
+           
+          +static base_game_info_t *themeGetBaseGame(item_list_t *support, int sourceId)
+          +{
+          +    if (support == NULL || sourceId < 0 || support->itemGet == NULL)
+          +        return NULL;
+          +
+          +    return (base_game_info_t *)support->itemGet(support, sourceId);
+          +}
+          +
+          +static int themeGameIsPS1VCD(item_list_t *support, int sourceId)
+          +{
+          +    base_game_info_t *game = themeGetBaseGame(support, sourceId);
+          +    return game != NULL && game->format == GAME_FORMAT_PS1_VCD;
+          +}
+          +
+           static GSTEXTURE *getGameImageTexture(image_cache_t *cache, void *support, struct submenu_item *item)
+           {
+               if (gEnableArt) {
+          @@ -1889,10 +1903,14 @@ int debugOpenProbe(const char *path)
+           static void triggerNetFetch(const char *title, const char *startup, const char *devicePrefix, int allowDeviceProbe) {
+               extern int gPS5ShowGamesLogo;
+               char matchedPath[256];
+          +    const char *artworkKey = startup;
+               u8 cardR = 100, cardG = 100, cardB = 100;
+               u8 bgR = 24, bgG = 24, bgB = 24;
+               net_req_t *existing = findNetCacheEntryForGame(title, startup, devicePrefix);
+           
+          +    if (startup != NULL && title != NULL && strlen(startup) == 11 && !strncmp(startup, "PS1", 3))
+          +        artworkKey = title;
+          +
+               if (existing != NULL && existing->hasTex != 0 &&
+                   (!gPS5ShowGamesLogo || existing->logoPath[0] != '\0' || existing->hasLogoTex == -1))
+                   return;
+          @@ -1937,7 +1955,7 @@ static void triggerNetFetch(const char *title, const char *startup, const char *
+                   } else {
+                       strcpy(prefix, "mass0:");
+                   }
+          -        snprintf(matchedPath, sizeof(matchedPath), "%s/ART/%s_COV.png", prefix, startup);
+          +        snprintf(matchedPath, sizeof(matchedPath), "%s/ART/%s_COV.png", prefix, artworkKey);
+               }
+               if (matchedPath[0] == '\0') {
+                   findBuiltInCoverForGame(title, matchedPath, sizeof(matchedPath));
+          @@ -1955,7 +1973,7 @@ static void triggerNetFetch(const char *title, const char *startup, const char *
+                   } else {
+                       strcpy(prefix, "mass0:");
+                   }
+          -        snprintf(logoPath, sizeof(logoPath), "%s/LOGO/%s_LOGO.png", prefix, startup);
+          +        snprintf(logoPath, sizeof(logoPath), "%s/LOGO/%s_LOGO.png", prefix, artworkKey);
+               }
+               strncpy(gNetCache[idx].logoPath, logoPath, sizeof(gNetCache[idx].logoPath) - 1);
+               gNetCache[idx].logoPath[sizeof(gNetCache[idx].logoPath) - 1] = '\0';
+          @@ -2533,11 +2551,13 @@ static void drawPS5SettingsText(int font, int x, int y, int align, const char *t
+           {
+               int renderFont = focused && gPS5SemiBoldFont >= 0 ? gPS5SemiBoldFont : font;
+           
+          -    if (focused && !(align & ALIGN_RIGHT))
+          +    if (focused && !(align & ALIGN_RIGHT)) {
+          +        rmDrawRoundedRectWide(x - 30, y - 16, screenWidth - x - 18, 32, 8, GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x0C));
+                   drawPS5FocusPointer(x - 22, y);
+          +    }
+           
+               fntRenderString(renderFont, x, y, align | ALIGN_VCENTER, 0, 0, text,
+          -        focused ? GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80) : GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          +        focused ? GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80) : GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x48));
+           }
+           
+           static const char *getPS5DeviceLabel(item_list_t *support)
+          @@ -2821,11 +2841,61 @@ void ps5MoveAlphabetGame(int direction)
+           }
+           
+           
+          +static int glassTriangleWave(unsigned int frame, int period, int amplitude)
+          +{
+          +    int phase = frame % period;
+          +
+          +    if (phase > period / 2)
+          +        phase = period - phase;
+          +
+          +    return (phase * amplitude * 2) / period;
+          +}
+          +
+          +static void drawGlassPanelWide(int x, int y, int w, int h, int radius)
+          +{
+          +    rmDrawRoundedRectWide(x - 1, y - 1, w + 2, h + 2, radius + 1, GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x18));
+          +    rmDrawRoundedRectWide(x, y, w, h, radius, GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x0A));
+          +}
+          +
+          +static void drawGlassAdminBackground(void)
+          +{
+          +    int i;
+          +    int bandHeight = (screenHeight + 11) / 12;
+          +    int emeraldShift = glassTriangleWave(gPS5TextureFrame, 420, 54);
+          +    int goldShift = glassTriangleWave(gPS5TextureFrame + 140, 520, 72);
+          +    int coralShift = glassTriangleWave(gPS5TextureFrame + 260, 600, 46);
+          +
+          +    /* CSS gradients and blur are not available on the PS2 GS. The layered
+          +       bands and translucent rounded shapes reproduce the same visual family
+          +       with a small and predictable rendering cost. */
+          +    for (i = 0; i < 12; i++) {
+          +        int r = 0x0A + (0x10 * i) / 11;
+          +        int g = 0x0F + (0x1F * i) / 11;
+          +        int b = 0x0D + (0x16 * i) / 11;
+          +        rmDrawRect(0, i * bandHeight, screenWidth, bandHeight + 1, GS_SETREG_RGBA(r, g, b, 0x80));
+          +    }
+          +
+          +    rmDrawRoundedRectWide(22 + emeraldShift, 74, 190, 190, 95, GS_SETREG_RGBA(0x05, 0x96, 0x69, 0x10));
+          +    rmDrawRoundedRectWide(screenWidth - 236 - goldShift, 226, 210, 210, 105, GS_SETREG_RGBA(0xD4, 0xA5, 0x74, 0x0E));
+          +    rmDrawRoundedRectWide(196 + coralShift, screenHeight - 156, 150, 150, 75, GS_SETREG_RGBA(0xE0, 0x7A, 0x5F, 0x0A));
+          +
+          +    rmDrawRect(0, 0, screenWidth, 76, GS_SETREG_RGBA(0x0A, 0x0F, 0x0D, 0x24));
+          +    rmDrawRect(0, screenHeight - 58, screenWidth, 58, GS_SETREG_RGBA(0x0A, 0x0F, 0x0D, 0x20));
+          +}
+          +
+          +static void drawGlassAdminChrome(int footerWidth)
+          +{
+          +    drawGlassPanelWide(18, 8, 344, 44, 14);
+          +    drawGlassPanelWide(18, screenHeight - 38, footerWidth, 30, 11);
+          +}
+          +
+           static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, struct theme_element *elem)
+           {
+               // Initialize Fonts and Mask Textures if not loaded
+               initPS5MaskTextures();
+               gPS5TextureFrame++;
+          +    drawGlassAdminBackground();
+          +    drawGlassAdminChrome(300);
+               gPS5TextureLoadsThisFrame = 0;
+               ps5CompleteAsyncTextureLoad();
+               ps5RecoverTimedOutTextureLoad();
+          @@ -2912,14 +2982,20 @@ static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, s
+               int settingsR1X = settingsX + rmUnScaleX(fntCalcDimensions(gPS5RegFont, "Settings")) + tabTextGap;
+           
+               fntRenderString(gPS5ActiveTab == 0 ? gPS5SemiBoldFont : gPS5RegFont, gamesX, 20, ALIGN_LEFT, 0, 0, "Games",
+          -        gPS5ActiveTab == 0 ? GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80) : GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          +        gPS5ActiveTab == 0 ? GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80) : GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x34));
+               fntRenderString(gPS5ActiveTab == 2 ? gPS5SemiBoldFont : gPS5RegFont, appsX, 20, ALIGN_LEFT, 0, 0, "Apps",
+          -        gPS5ActiveTab == 2 ? GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80) : GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          +        gPS5ActiveTab == 2 ? GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80) : GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x34));
+               fntRenderString(gPS5ActiveTab == 1 ? gPS5SemiBoldFont : gPS5RegFont, settingsX, 20, ALIGN_LEFT, 0, 0, "Settings",
+          -        gPS5ActiveTab == 1 ? GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80) : GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          +        gPS5ActiveTab == 1 ? GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80) : GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x34));
+               // Small L1/R1 indicators (smaller font size, offset adjusted for alignment)
+          -    fntRenderString(gPS5SemiBoldFont, l1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "L1", GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x50));
+          -    fntRenderString(gPS5SemiBoldFont, settingsR1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "R1", GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x50));
+          +    fntRenderString(gPS5SemiBoldFont, l1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "L1", GS_SETREG_RGBA(0xD4, 0xA5, 0x74, 0x58));
+          +    fntRenderString(gPS5SemiBoldFont, settingsR1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "R1", GS_SETREG_RGBA(0xD4, 0xA5, 0x74, 0x58));
+          +    if (gPS5ActiveTab == 0)
+          +        rmDrawRect(gamesX, 48, 52, 2, GS_SETREG_RGBA(0x34, 0xD3, 0x99, 0x70));
+          +    else if (gPS5ActiveTab == 2)
+          +        rmDrawRect(appsX, 48, 38, 2, GS_SETREG_RGBA(0x34, 0xD3, 0x99, 0x70));
+          +    else
+          +        rmDrawRect(settingsX, 48, 66, 2, GS_SETREG_RGBA(0x34, 0xD3, 0x99, 0x70));
+               if (gPS5ActiveTab == 0 && deviceLabel[0] != '\0')
+                   fntRenderString(gPS5SemiBoldFont, screenWidth - 20, 27, ALIGN_RIGHT, 0.70f, 0.70f, deviceLabel, GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80));
+           
+          @@ -3114,11 +3190,16 @@ static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, s
+                                   hasCover = (cacheEntry->hasTex == 1);
+           
+                               if (gPS5ShowGamesLogo && hasCover && cacheEntry) {
+          -                        rmDrawRoundedRectWide(x1, y1, width, height, 12, GS_SETREG_RGBA(0x00, 0x00, 0x00, 0x80));
+          +                        rmDrawRoundedRectWide(x1 - 2, y1 - 2, width + 4, height + 4, 14,
+          +                            t > 0.5f ? GS_SETREG_RGBA(0xD4, 0xA5, 0x74, 0x70) : GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x18));
+          +                        rmDrawRoundedRectWide(x1, y1, width, height, 12, GS_SETREG_RGBA(0x0A, 0x0F, 0x0D, 0x80));
+                                   rmDrawRoundedSquareThumbnailWide(&cacheEntry->coverTex, x1, y1, width, height, 12);
+                               } else {
+          -                        // 1. Draw beautifully colored rounded card
+          -                        rmDrawRoundedRectWide(x1, y1, width, height, 12, GS_SETREG_RGBA(cR, cG, cB, cardAlpha));
+          +                        // Glass card inspired by the supplied dashboard theme.
+          +                        rmDrawRoundedRectWide(x1 - 1, y1 - 1, width + 2, height + 2, 13,
+          +                            t > 0.5f ? GS_SETREG_RGBA(0x34, 0xD3, 0x99, 0x68) : GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x16));
+          +                        rmDrawRoundedRectWide(x1, y1, width, height, 12,
+          +                            t > 0.5f ? GS_SETREG_RGBA(0x05, 0x96, 0x69, 0x48) : GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x0C));
+           
+                                   // 2. Extract initials of the game dynamically
+                                   char initials[8];
+          @@ -3195,7 +3276,7 @@ static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, s
+           
+                       if (selectedVisibleItem) {
+                           const char *fullTitle = submenuItemGetText(&selectedVisibleItem->item);
+          -                fntRenderString(gPS5TitleFont, 50, 316, ALIGN_LEFT, 0, 0, fullTitle, GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80));
+          +                fntRenderString(gPS5TitleFont, 50, 316, ALIGN_LEFT, 0, 0, fullTitle, GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80));
+           
+                           // Developer name (using Game ID lookup)
+                           int sourceId;
+          @@ -3204,7 +3285,9 @@ static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, s
+                           if (support && support->itemGetStartup && !isUnplugged) {
+                               startup = support->itemGetStartup(support, sourceId);
+                           }
+          -                fntRenderString(gPS5RegFont, 50, 354, ALIGN_LEFT, 0, 0, getGameDeveloper(startup, fullTitle), GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          +                fntRenderString(gPS5RegFont, 50, 354, ALIGN_LEFT, 0, 0,
+          +                    themeGameIsPS1VCD(support, sourceId) ? "PlayStation" : getGameDeveloper(startup, fullTitle),
+          +                    GS_SETREG_RGBA(0xD4, 0xA5, 0x74, 0x70));
+                       } else {
+                           fntRenderString(gPS5BoldFont, 320, 245, ALIGN_CENTER, 0, 0, "NO GAMES FOUND", GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x2C));
+                       }
+          @@ -3299,20 +3382,18 @@ static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, s
+                   int scrollOffset = 0;
+                   int g, i;
+           
+          -        gPS5BgColorR = 0;
+          -        gPS5BgColorG = 0;
+          -        gPS5BgColorB = 0;
+          -        rmDrawRect(0, 0, screenWidth, screenHeight, GS_SETREG_RGBA(0, 0, 0, 0x80));
+          -        rmDrawRect(0, 0, screenWidth, headerBottom, GS_SETREG_RGBA(0, 0, 0, 0x80));
+          -        rmDrawRect(0, footerTop, screenWidth, screenHeight - footerTop, GS_SETREG_RGBA(0, 0, 0, 0x80));
+          -        rmDrawRect(0, headerBottom, screenWidth, 1, GS_SETREG_RGBA(0x38, 0x38, 0x38, 0x40));
+          -        rmDrawRect(0, footerTop, screenWidth, 1, GS_SETREG_RGBA(0x38, 0x38, 0x38, 0x40));
+          -
+          -        fntRenderString(gPS5RegFont, gamesX, 20, ALIGN_LEFT, 0, 0, "Games", GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          -        fntRenderString(gPS5SemiBoldFont, appsX, 20, ALIGN_LEFT, 0, 0, "Apps", GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80));
+          -        fntRenderString(gPS5RegFont, settingsX, 20, ALIGN_LEFT, 0, 0, "Settings", GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          -        fntRenderString(gPS5SemiBoldFont, l1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "L1", GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x50));
+          -        fntRenderString(gPS5SemiBoldFont, settingsR1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "R1", GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x50));
+          +        gPS5BgColorR = 0x0D;
+          +        gPS5BgColorG = 0x1A;
+          +        gPS5BgColorB = 0x14;
+          +        drawGlassAdminBackground();
+          +        drawGlassAdminChrome(330);
+          +
+          +        fntRenderString(gPS5RegFont, gamesX, 20, ALIGN_LEFT, 0, 0, "Games", GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x34));
+          +        fntRenderString(gPS5SemiBoldFont, appsX, 20, ALIGN_LEFT, 0, 0, "Apps", GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80));
+          +        fntRenderString(gPS5RegFont, settingsX, 20, ALIGN_LEFT, 0, 0, "Settings", GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x34));
+          +        fntRenderString(gPS5SemiBoldFont, l1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "L1", GS_SETREG_RGBA(0xD4, 0xA5, 0x74, 0x58));
+          +        fntRenderString(gPS5SemiBoldFont, settingsR1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "R1", GS_SETREG_RGBA(0xD4, 0xA5, 0x74, 0x58));
+          +        rmDrawRect(appsX, 48, 38, 2, GS_SETREG_RGBA(0x34, 0xD3, 0x99, 0x70));
+           
+                   for (g = 0; g < gPS5AppsGroupCount; g++) {
+                       if (gPS5AppGroups[g].count <= 0)
+          @@ -3355,10 +3436,12 @@ static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, s
+                                   strncpy(name, gPS5Apps[i].name, sizeof(name) - 1);
+                                   name[sizeof(name) - 1] = '\0';
+                                   fntFitString(focused ? gPS5SemiBoldFont : gPS5RegFont, name, screenWidth - rowX - 64);
+          -                        if (focused)
+          +                        if (focused) {
+          +                            rmDrawRoundedRectWide(rowX - 30, y - 14, screenWidth - rowX - 18, 28, 8, GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x0C));
+                                       drawPS5FocusPointer(rowX - 22, y);
+          +                        }
+                                   fntRenderString(focused ? gPS5SemiBoldFont : gPS5RegFont, rowX, y, ALIGN_LEFT | ALIGN_VCENTER, 0, 0, name,
+          -                            focused ? GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80) : GS_SETREG_RGBA(0xA0, 0xA0, 0xA0, 0x70));
+          +                            focused ? GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80) : GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x58));
+                               }
+                               rowIndex++;
+                           }
+          @@ -3512,11 +3595,8 @@ static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, s
+                           smbScrollOffset = smbFocusY - (headerBottom + 36);
+                       smbRowY -= smbScrollOffset;
+           
+          -            rmDrawRect(0, 0, screenWidth, screenHeight, GS_SETREG_RGBA(0, 0, 0, 0x80));
+          -            rmDrawRect(0, 0, screenWidth, headerBottom, GS_SETREG_RGBA(0, 0, 0, 0x80));
+          -            rmDrawRect(0, footerTop, screenWidth, screenHeight - footerTop, GS_SETREG_RGBA(0, 0, 0, 0x80));
+          -            rmDrawRect(0, headerBottom, screenWidth, 1, GS_SETREG_RGBA(0x38, 0x38, 0x38, 0x40));
+          -            rmDrawRect(0, footerTop, screenWidth, 1, GS_SETREG_RGBA(0x38, 0x38, 0x38, 0x40));
+          +            drawGlassAdminBackground();
+          +            drawGlassAdminChrome(330);
+           
+                       fntRenderString(gPS5SemiBoldFont, rowX, 20, ALIGN_LEFT, 0, 0, "SMB Settings", GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80));
+           
+          @@ -3577,12 +3657,14 @@ static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, s
+                           }
+           
+                           fntFitString(focused ? gPS5SemiBoldFont : gPS5RegFont, value, screenWidth / 2);
+          -                if (focused)
+          +                if (focused) {
+          +                    rmDrawRoundedRectWide(rowX - 30, y - 15, screenWidth - rowX - 18, 30, 8, GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x0C));
+                               drawPS5FocusPointer(rowX - 22, y);
+          +                }
+                           fntRenderString(focused ? gPS5SemiBoldFont : gPS5RegFont, rowX, y, ALIGN_LEFT | ALIGN_VCENTER, 0, 0, label,
+          -                    focused ? GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80) : GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          +                    focused ? GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80) : GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x48));
+                           fntRenderString(focused ? gPS5SemiBoldFont : gPS5RegFont, rightX, y, ALIGN_RIGHT | ALIGN_VCENTER, 0, 0, value,
+          -                    focused ? GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80) : GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          +                    focused ? GS_SETREG_RGBA(0x34, 0xD3, 0x99, 0x80) : GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x48));
+                       }
+           
+                       int isToggle = (gPS5SmbSettingsSel == 0 || gPS5SmbSettingsSel == 5 || gPS5SmbSettingsSel == 7);
+          @@ -3681,14 +3763,14 @@ static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, s
+                   char coverButton[32];
+                   int coverFocused = gPS5SubSel == 7;
+                   int smbFocused = gPS5SubSel == 8;
+          -        u64 idleCardColor = GS_SETREG_RGBA(0x1C, 0x1C, 0x1C, 0x80);
+          -        u64 focusedCardColor = GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80);
+          -        u64 idleHeadingColor = GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80);
+          -        u64 idleSubColor = GS_SETREG_RGBA(0xA0, 0xA0, 0xA0, 0x72);
+          -        u64 focusedTextColor = GS_SETREG_RGBA(0x00, 0x00, 0x00, 0x80);
+          -        u64 idleButtonColor = GS_SETREG_RGBA(0x30, 0x30, 0x30, 0x80);
+          -        u64 focusedButtonColor = GS_SETREG_RGBA(0x00, 0x00, 0x00, 0x80);
+          -        u64 buttonTextColor = GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80);
+          +        u64 idleCardColor = GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x0C);
+          +        u64 focusedCardColor = GS_SETREG_RGBA(0x05, 0x96, 0x69, 0x54);
+          +        u64 idleHeadingColor = GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80);
+          +        u64 idleSubColor = GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x50);
+          +        u64 focusedTextColor = GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80);
+          +        u64 idleButtonColor = GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x10);
+          +        u64 focusedButtonColor = GS_SETREG_RGBA(0xD4, 0xA5, 0x74, 0x68);
+          +        u64 buttonTextColor = GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80);
+           
+                   snprintf(coverSummary, sizeof(coverSummary), "Missing covers? Download now.");
+                   snprintf(smbSummary, sizeof(smbSummary), "Connect network shared games.");
+          @@ -3727,20 +3809,14 @@ static void drawPS5Launcher(struct menu_list *menu, struct submenu_list *item, s
+                       fntRenderString(gPS5RegFont, smbBtnX + (smbBtnW / 2), smbBtnY + 5, ALIGN_HCENTER, 0, 0, smbState, buttonTextColor);
+                   }
+           
+          -        {
+          -            int settingsHeaderBottom = 56;
+          -            int settingsFooterTop = screenHeight - 44;
+          -            rmDrawRect(0, 0, screenWidth, settingsHeaderBottom, GS_SETREG_RGBA(0, 0, 0, 0x80));
+          -            rmDrawRect(0, settingsFooterTop, screenWidth, screenHeight - settingsFooterTop, GS_SETREG_RGBA(0, 0, 0, 0x80));
+          -            rmDrawRect(0, settingsHeaderBottom, screenWidth, 1, GS_SETREG_RGBA(0x38, 0x38, 0x38, 0x40));
+          -            rmDrawRect(0, settingsFooterTop, screenWidth, 1, GS_SETREG_RGBA(0x38, 0x38, 0x38, 0x40));
+          -        }
+          +        drawGlassAdminChrome(330);
+           
+          -        fntRenderString(gPS5RegFont, gamesX, 20, ALIGN_LEFT, 0, 0, "Games", GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          -        fntRenderString(gPS5RegFont, appsX, 20, ALIGN_LEFT, 0, 0, "Apps", GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x56));
+          -        fntRenderString(gPS5SemiBoldFont, settingsX, 20, ALIGN_LEFT, 0, 0, "Settings", GS_SETREG_RGBA(0xFF, 0xFF, 0xFF, 0x80));
+          -        fntRenderString(gPS5SemiBoldFont, l1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "L1", GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x50));
+          -        fntRenderString(gPS5SemiBoldFont, settingsR1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "R1", GS_SETREG_RGBA(0x58, 0x58, 0x58, 0x50));
+          +        fntRenderString(gPS5RegFont, gamesX, 20, ALIGN_LEFT, 0, 0, "Games", GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x34));
+          +        fntRenderString(gPS5RegFont, appsX, 20, ALIGN_LEFT, 0, 0, "Apps", GS_SETREG_RGBA(0xF5, 0xF5, 0xF4, 0x34));
+          +        fntRenderString(gPS5SemiBoldFont, settingsX, 20, ALIGN_LEFT, 0, 0, "Settings", GS_SETREG_RGBA(0xFE, 0xF3, 0xE2, 0x80));
+          +        fntRenderString(gPS5SemiBoldFont, l1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "L1", GS_SETREG_RGBA(0xD4, 0xA5, 0x74, 0x58));
+          +        fntRenderString(gPS5SemiBoldFont, settingsR1X, 27, ALIGN_LEFT, 0.70f, 0.70f, "R1", GS_SETREG_RGBA(0xD4, 0xA5, 0x74, 0x58));
+          +        rmDrawRect(settingsX, 48, 66, 2, GS_SETREG_RGBA(0x34, 0xD3, 0x99, 0x70));
+           
+                   // 4. Draw irfanmatheena in lowercase with Instagram icon at bottom-left (aligned vertically to Save center)
+                   extern GSTEXTURE gPS5InstagramTex;
+          PATCH
           git diff --check
-          git diff -- include/supportbase.h include/system.h src/system.c src/supportbase.c src/ethsupport.c src/bdmsupport.c src/themes.c src/themes.c
 
-      - name: Build with ps2dev container
+      - name: Build with PS2DEV
         run: |
           docker pull ps2dev/ps2dev:latest
           docker run --rm \
@@ -40,34 +647,30 @@ jobs:
               git config --global --add safe.directory /src &&
               if [ ! -d modules/network/lwNBD ]; then
                 git clone https://github.com/bignaux/lwNBD.git modules/network/lwNBD &&
-                (cd modules/network/lwNBD && git checkout 9777a10f840679ef89b1ec6a588e2d93803d7c37);
+                (cd modules/network/lwNBD && git checkout 9777a10f840679ef89b1ec6a588e2d93803d7c37)
               fi &&
               if [ ! -f lang_compiler.py ]; then
-                curl -L https://raw.githubusercontent.com/ps2homebrew/Open-PS2-Loader/master/lang_compiler.py -o lang_compiler.py;
+                curl -L https://raw.githubusercontent.com/ps2homebrew/Open-PS2-Loader/master/lang_compiler.py -o lang_compiler.py
               fi &&
               python3 lang_compiler.py --make_header --base lng_tmpl/_base.yml include/lang_autogen.h &&
               python3 lang_compiler.py --make_source --base lng_tmpl/_base.yml src/lang_internal.c &&
-              echo "PS2DEV=$PS2DEV" &&
-              command -v mips64r5900el-ps2-elf-gcc &&
-              command -v make &&
-              make -j2 LOCALVERSION=ps1-usb-test
+              make -j2 LOCALVERSION=ps1-usb-glass
             '
 
-      - name: Collect ELF
+      - name: Collect ELF files
         run: |
           mkdir -p out
           if [ -f src/PS2L.ELF ]; then
-            cp src/PS2L.ELF out/PS2Launcher_PS1_USB_TEST.ELF
+            cp src/PS2L.ELF out/PS2Launcher-PS1-USB-GLASS.ELF
           fi
           if [ -f src/opl.elf ]; then
-            cp src/opl.elf out/PS2Launcher_PS1_USB_TEST_unpacked.ELF
+            cp src/opl.elf out/PS2Launcher-PS1-USB-GLASS_unpacked.ELF
           fi
-          ls -lah out
           test -n "$(find out -maxdepth 1 -type f -name '*.ELF' -print -quit)"
 
-      - name: Upload ELF
+      - name: Upload ELF artifact
         uses: actions/upload-artifact@v4
         with:
-          name: PS2Launcher-PS1-USB-classic-v12
+          name: PS2Launcher-PS1-USB-GLASS
           path: out/*.ELF
           if-no-files-found: error
