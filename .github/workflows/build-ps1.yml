@@ -1,4 +1,4 @@
-name: Build PS2-Launcher PS1 USB test v5
+name: Build PS2-Launcher PS1 USB test v6
 
 on:
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
             -v "$PWD/src:/src" \
             -w /src \
             ps2dev/ps2dev:latest \
-            sh -lc 'make clean || true; make -j2 LOCALVERSION=ps1-usb-test'
+            sh -lc 'apk add --no-cache build-base git bash && make clean || true; make -j2 LOCALVERSION=ps1-usb-test'
 
       - name: Collect ELF
         run: |
@@ -45,6 +45,6 @@ jobs:
       - name: Upload ELF
         uses: actions/upload-artifact@v4
         with:
-          name: PS2Launcher-PS1-USB-test-v5
+          name: PS2Launcher-PS1-USB-test-v6
           path: out/*.ELF
           if-no-files-found: error
