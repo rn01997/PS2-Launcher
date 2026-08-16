@@ -1,0 +1,398 @@
+name: Build PS2-Launcher PS1 USB test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get PS2-Launcher 4.0.0
+        run: |
+          git clone --recursive --branch v4.0.0 --depth 1 https://github.com/Irfanlesnar/PS2-Launcher.git src
+
+      - name: Apply PS1 USB patch
+        run: |
+          cat > /tmp/ps1-usb.patch <<'PATCH'
+          diff --git a/include/supportbase.h b/include/supportbase.h
+          --- a/include/supportbase.h
+          +++ b/include/supportbase.h
+          @@
+           enum GAME_FORMAT {
+               GAME_FORMAT_USBLD = 0,
+               GAME_FORMAT_OLD_ISO,
+               GAME_FORMAT_ISO,
+          +    /* PlayStation 1 POPStarter VCD.  This is intentionally a separate
+          +       format so the normal PS2 cdvdman launch path is never used. */
+          +    GAME_FORMAT_PS1_VCD,
+           };
+          @@
+          -int sbReadList(base_game_info_t **list, const char *prefix, int *fsize, int *gamecount);
+          +int sbReadList(base_game_info_t **list, const char *prefix, int *fsize, int *gamecount, int scanPS1VCDs);
+          
+          diff --git a/include/bdmsupport.h b/include/bdmsupport.h
+          --- a/include/bdmsupport.h
+          +++ b/include/bdmsupport.h
+          @@
+               int bdmULSizePrev;
+               time_t bdmModifiedCDPrev;
+               time_t bdmModifiedDVDPrev;
+          +    time_t bdmModifiedPOPSPrev;
+               int bdmGameCount;
+          
+          diff --git a/include/system.h b/include/system.h
+          --- a/include/system.h
+          +++ b/include/system.h
+          @@
+           int sysExecElf(const char *path);
+          +/* Execute an ELF and append extra argv entries after argv[0] (the ELF path).
+          +   POPSLoader 1.2.0 uses this for -page=usb and -game=<file>. */
+          +int sysExecElfWithArgs(const char *path, int extra_argc, const char *const extra_argv[]);
+           int sysLoadModuleBuffer(void *buffer, int size, int argc, char *argv);
+          
+          diff --git a/src/supportbase.c b/src/supportbase.c
+          --- a/src/supportbase.c
+          +++ b/src/supportbase.c
+          @@
+           static int scanForISO(char *path, char type, struct game_list_t **glist)
+           {
+          @@
+               return count;
+           }
+          +
+          +/* Scan <device>:/POPS for POPStarter .VCD files and expose them through the
+          +   normal game-list abstraction.  The short startup token is only an internal
+          +   stable identity (favorites/recent/config); the real VCD filename remains in
+          +   name + extension. */
+          +static int scanForPS1VCD(char *path, struct game_list_t **glist)
+          +{
+          +    int count = 0;
+          +    struct dirent *dirent;
+          +    DIR *dir;
+          +
+          +    if ((dir = opendir(path)) != NULL) {
+          +        while ((dirent = readdir(dir)) != NULL) {
+          +            size_t len = strlen(dirent->d_name);
+          +            size_t nameLen;
+          +            struct game_list_t *next;
+          +            base_game_info_t *game;
+          +
+          +            if (len <= 4 || strcasecmp(&dirent->d_name[len - 4], ".VCD") != 0)
+          +                continue;
+          +
+          +            nameLen = len - 4;
+          +            if (nameLen == 0 || nameLen > ISO_GAME_NAME_MAX)
+          +                continue;
+          +
+          +            next = malloc(sizeof(struct game_list_t));
+          +            if (next == NULL)
+          +                break;
+          +
+          +            next->next = *glist;
+          +            *glist = next;
+          +            game = &next->gameinfo;
+          +            memset(game, 0, sizeof(base_game_info_t));
+          +
+          +            memcpy(game->name, dirent->d_name, nameLen);
+          +            game->name[nameLen] = '\0';
+          +            strcpy(game->extension, ".VCD");
+          +
+          +            /* 11 chars: PS1 + 8 hex digits, fits GAME_STARTUP_MAX (12). */
+          +            snprintf(game->startup, sizeof(game->startup), "PS1%08X", USBA_crc32(dirent->d_name));
+          +
+          +            game->parts = 1;
+          +            game->media = SCECdPS2CD; /* not consumed by the PS1 launch path */
+          +            game->format = GAME_FORMAT_PS1_VCD;
+          +            game->sizeMB = 0;
+          +            count++;
+          +        }
+          +        closedir(dir);
+          +    }
+          +
+          +    return count;
+          +}
+           
+          -int sbReadList(base_game_info_t **list, const char *prefix, int *fsize, int *gamecount)
+          +int sbReadList(base_game_info_t **list, const char *prefix, int *fsize, int *gamecount, int scanPS1VCDs)
+           {
+          @@
+               snprintf(path, sizeof(path), "%sDVD", prefix);
+               if ((result = scanForISO(path, SCECdPS2DVD, &dlist_head)) >= 0) {
+                   count = count < 0 ? result : count + result;
+               }
+          +
+          +    /* Only callers that explicitly opt in (USB BDM in this POC) get PS1
+          +       entries.  SMB/HDD callers keep their original behavior. */
+          +    if (scanPS1VCDs) {
+          +        snprintf(path, sizeof(path), "%sPOPS", prefix);
+          +        if ((result = scanForPS1VCD(path, &dlist_head)) >= 0)
+          +            count = count < 0 ? result : count + result;
+          +    }
+          @@
+           static void sbCreatePath_name(const base_game_info_t *game, char *path, const char *prefix, const char *sep, int part, const char *game_name)
+           {
+               switch (game->format) {
+          @@
+                   case GAME_FORMAT_OLD_ISO:
+                       snprintf(path, 256, "%s%s%s%s.%s%s", prefix, (game->media == SCECdPS2CD) ? "CD" : "DVD", sep, game->startup, game_name, game->extension);
+                       break;
+          +        case GAME_FORMAT_PS1_VCD:
+          +            snprintf(path, 256, "%sPOPS%s%s%s", prefix, sep, game_name, game->extension);
+          +            break;
+               }
+           }
+          @@
+           config_set_t *sbPopulateConfig(base_game_info_t *game, const char *prefix, const char *sep)
+           {
+          @@
+          -    if ((game->sizeMB == 0) && (game->format != GAME_FORMAT_OLD_ISO)) {
+          +    if ((game->sizeMB == 0) && (game->format != GAME_FORMAT_OLD_ISO)) {
+                   char gamepath[256];
+           
+          -        snprintf(gamepath, sizeof(gamepath), "%s%s%s%s%s%s", prefix, sep, game->media == SCECdPS2CD ? "CD" : "DVD", sep, game->name, game->extension);
+          +        if (game->format == GAME_FORMAT_PS1_VCD)
+          +            snprintf(gamepath, sizeof(gamepath), "%sPOPS%s%s%s", prefix, sep, game->name, game->extension);
+          +        else
+          +            snprintf(gamepath, sizeof(gamepath), "%s%s%s%s%s%s", prefix, sep, game->media == SCECdPS2CD ? "CD" : "DVD", sep, game->name, game->extension);
+          @@
+          -    if (game->format != GAME_FORMAT_USBLD) {
+          +    if (game->format == GAME_FORMAT_PS1_VCD) {
+          +        configSetStr(config, CONFIG_ITEM_FORMAT, "VCD");
+          +        configSetStr(config, CONFIG_ITEM_MEDIA, "PS1");
+          +    } else if (game->format != GAME_FORMAT_USBLD) {
+                   if (!strcmp(game->extension, ".iso"))
+                       configSetStr(config, CONFIG_ITEM_FORMAT, "ISO");
+                   else if (!strcmp(game->extension, ".zso"))
+                       configSetStr(config, CONFIG_ITEM_FORMAT, "ZSO");
+               } else if (game->format == GAME_FORMAT_USBLD)
+                   configSetStr(config, CONFIG_ITEM_FORMAT, "UL");
+           
+          -    configSetStr(config, CONFIG_ITEM_MEDIA, game->media == SCECdPS2CD ? "CD" : "DVD");
+          +    if (game->format != GAME_FORMAT_PS1_VCD)
+          +        configSetStr(config, CONFIG_ITEM_MEDIA, game->media == SCECdPS2CD ? "CD" : "DVD");
+          
+          diff --git a/src/ethsupport.c b/src/ethsupport.c
+          --- a/src/ethsupport.c
+          +++ b/src/ethsupport.c
+          @@
+          -    if (sbReadList(&ethGames, ethPrefix, &ethULSizePrev, &ethGameCount) < 0) {
+          +    if (sbReadList(&ethGames, ethPrefix, &ethULSizePrev, &ethGameCount, 0) < 0) {
+                   ethGameCount = 0;
+               }
+          
+          diff --git a/src/system.c b/src/system.c
+          --- a/src/system.c
+          +++ b/src/system.c
+          @@
+          -int sysExecElf(const char *path)
+          +#define SYS_EXEC_MAX_EXTRA_ARGS 4
+          +#define SYS_EXEC_ARG_MAX        256
+          +
+          +int sysExecElfWithArgs(const char *path, int extra_argc, const char *const extra_argv[])
+           {
+          -    char *argv[1];
+          +    char *argv[1 + SYS_EXEC_MAX_EXTRA_ARGS];
+          +    char argStorage[SYS_EXEC_MAX_EXTRA_ARGS][SYS_EXEC_ARG_MAX];
+               char execPath[256];
+               t_ExecData elf;
+          -    int i;
+          +    int i, argc;
+           
+               if (path == NULL || path[0] == '\0')
+                   return -1;
+          +
+          +    if (extra_argc < 0 || extra_argc > SYS_EXEC_MAX_EXTRA_ARGS)
+          +        return -1;
+          +
+          +    if (extra_argc > 0 && extra_argv == NULL)
+          +        return -1;
+          @@
+               execPath[i] = '\0';
+           
+               argv[0] = execPath;
+          +    argc = 1;
+          +
+          +    for (i = 0; i < extra_argc; i++) {
+          +        if (extra_argv[i] == NULL)
+          +            return -1;
+          +        strncpy(argStorage[i], extra_argv[i], SYS_EXEC_ARG_MAX - 1);
+          +        argStorage[i][SYS_EXEC_ARG_MAX - 1] = '\0';
+          +        argv[argc++] = argStorage[i];
+          +    }
+           
+               if (SifLoadElf(execPath, &elf) != 0)
+                   return -1;
+          @@
+          -    ExecPS2((void *)elf.epc, (void *)elf.gp, 1, argv);
+          +    ExecPS2((void *)elf.epc, (void *)elf.gp, argc, argv);
+               return 0;
+           }
+          +
+          +int sysExecElf(const char *path)
+          +{
+          +    return sysExecElfWithArgs(path, 0, NULL);
+          +}
+          
+          diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+          --- a/src/bdmsupport.c
+          +++ b/src/bdmsupport.c
+          @@
+           void bdmInit(item_list_t *itemList)
+           {
+          @@
+               pDeviceData->bdmULSizePrev = -2;
+               pDeviceData->bdmModifiedCDPrev = 0;
+               pDeviceData->bdmModifiedDVDPrev = 0;
+          +    pDeviceData->bdmModifiedPOPSPrev = 0;
+          @@
+               if (pDeviceData->ForceRefresh != 0) {
+          @@
+                   pDeviceData->bdmModifiedCDPrev = 0;
+                   pDeviceData->bdmModifiedDVDPrev = 0;
+          +        pDeviceData->bdmModifiedPOPSPrev = 0;
+          @@
+               if (pDeviceData->DeferredScan != 0) {
+          @@
+                   pDeviceData->bdmModifiedCDPrev = 0;
+                   pDeviceData->bdmModifiedDVDPrev = 0;
+          +        pDeviceData->bdmModifiedPOPSPrev = 0;
+          @@
+               sprintf(path, "%sDVD", pDeviceData->bdmPrefix);
+          @@
+               if (pDeviceData->bdmModifiedDVDPrev != st.st_mtime) {
+                   pDeviceData->bdmModifiedDVDPrev = st.st_mtime;
+                   result = 1;
+               }
+          +
+          +    /* USB PS1 library refresh.  Do not affect MX4SIO/iLink/ATA in this POC. */
+          +    if (pDeviceData->bdmDeviceType == BDM_TYPE_USB) {
+          +        sprintf(path, "%sPOPS", pDeviceData->bdmPrefix);
+          +        if (stat(path, &st) != 0)
+          +            st.st_mtime = 0;
+          +        if (pDeviceData->bdmModifiedPOPSPrev != st.st_mtime) {
+          +            pDeviceData->bdmModifiedPOPSPrev = st.st_mtime;
+          +            result = 1;
+          +        }
+          +    }
+          @@
+          -    if (sbReadList(&pDeviceData->bdmGames, pDeviceData->bdmPrefix, &pDeviceData->bdmULSizePrev, &pDeviceData->bdmGameCount) < 0) {
+          +    if (sbReadList(&pDeviceData->bdmGames,
+          +                   pDeviceData->bdmPrefix,
+          +                   &pDeviceData->bdmULSizePrev,
+          +                   &pDeviceData->bdmGameCount,
+          +                   pDeviceData->bdmDeviceType == BDM_TYPE_USB) < 0) {
+          @@
+           static char *bdmGetGameStartup(item_list_t *itemList, int id)
+           {
+          @@
+           }
+          +
+          +/* Launch a POPS VCD through POPSLoader 1.2.0's documented front-end API.
+          +   POPSLoader then owns POPStarter selection, USB-delay profile, BDMA, and the
+          +   actual POPStarter handoff. */
+          +static void bdmLaunchPS1Game(item_list_t *itemList, bdm_device_data_t *pDeviceData, base_game_info_t *game)
+          +{
+          +    char popsLoaderPath[256];
+          +    char gameArg[ISO_GAME_NAME_MAX + ISO_GAME_EXTENSION_MAX + 16];
+          +    const char *args[2];
+          +    int fd;
+          +
+          +    if (pDeviceData->bdmDeviceType != BDM_TYPE_USB) {
+          +        guiMsgBox("PS1 VCD POC currently supports USB only.", 0, NULL);
+          +        return;
+          +    }
+          +
+          +    snprintf(popsLoaderPath, sizeof(popsLoaderPath), "%sAPPS/POPSLOADER.ELF", pDeviceData->bdmPrefix);
+          +    fd = open(popsLoaderPath, O_RDONLY);
+          +    if (fd < 0) {
+          +        guiMsgBox("POPSLOADER.ELF not found in APPS.", 0, NULL);
+          +        return;
+          +    }
+          +    close(fd);
+          +
+          +    snprintf(gameArg, sizeof(gameArg), "-game=%s%s", game->name, game->extension);
+          +    args[0] = "-page=usb";
+          +    args[1] = gameArg;
+          +
+          +    if (gRememberLastPlayed) {
+          +        configSetStr(configGetByType(CONFIG_LAST), "last_played", game->startup);
+          +        saveConfig(CONFIG_LAST, 0);
+          +    }
+          +
+          +    /* sysExecElfWithArgs deinitializes PS2-Launcher after loading the target. */
+          +    if (sysExecElfWithArgs(popsLoaderPath, 2, args) < 0)
+          +        guiMsgBox("Could not launch POPSLoader.", 0, NULL);
+          +}
+          @@
+           void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+           {
+          @@
+               if (gAutoLaunchBDMGame == NULL) {
+          @@
+                   game = &pDeviceData->bdmGames[id];
+          @@
+                   game = gAutoLaunchBDMGame;
+               }
+          +
+          +    /* Never send a PS1 VCD into the PS2 cdvdman/fragment pipeline. */
+          +    if (game->format == GAME_FORMAT_PS1_VCD) {
+          +        bdmLaunchPS1Game(itemList, pDeviceData, game);
+          +        return;
+          +    }
+          @@
+           static int bdmGetImage(item_list_t *itemList, char *folder, int isRelative, char *value, char *suffix, GSTEXTURE *resultTex, short psm)
+           {
+               char path[256];
+          +    const char *imageValue = value;
+          @@
+               bdm_device_data_t *pDeviceData = (bdm_device_data_t *)itemList->priv;
+          +
+          +    /* PS2 art is normally keyed by startup ID.  PS1 VCD art in this POC is
+          +       keyed by the VCD title, matching POPSLoader's ART convention. */
+          +    if (isRelative && value != NULL && pDeviceData->bdmGames != NULL) {
+          +        int i;
+          +        for (i = 0; i < pDeviceData->bdmGameCount; i++) {
+          +            base_game_info_t *game = &pDeviceData->bdmGames[i];
+          +            if (game->format == GAME_FORMAT_PS1_VCD && strcmp(game->startup, value) == 0) {
+          +                imageValue = game->name;
+          +                break;
+          +            }
+          +        }
+          +    }
+          @@
+               if (isRelative)
+          -        snprintf(path, sizeof(path), "%s%s/%s_%s", pDeviceData->bdmPrefix, folder, value, suffix);
+          +        snprintf(path, sizeof(path), "%s%s/%s_%s", pDeviceData->bdmPrefix, folder, imageValue, suffix);
+               else
+          -        snprintf(path, sizeof(path), "%s%s_%s", folder, value, suffix);
+          +        snprintf(path, sizeof(path), "%s%s_%s", folder, imageValue, suffix);
+               return texDiscoverLoad(resultTex, path, -1);
+           }
+          PATCH
+          cd src
+          git apply --check /tmp/ps1-usb.patch
+          git apply /tmp/ps1-usb.patch
+
+      - name: Build with official ps2dev container
+        run: |
+          docker pull ps2dev/ps2dev:latest
+          docker run --rm \
+            -v "$PWD/src:/src" \
+            -w /src \
+            ps2dev/ps2dev:latest \
+            sh -lc 'make clean || true; make -j2 LOCALVERSION=ps1-usb-test'
+
+      - name: Collect ELF
+        run: |
+          mkdir -p out
+          if [ -f src/PS2L.ELF ]; then cp src/PS2L.ELF out/PS2Launcher_PS1_USB_TEST.ELF; fi
+          if [ -f src/opl.elf ]; then cp src/opl.elf out/PS2Launcher_PS1_USB_TEST_unpacked.ELF; fi
+          ls -lah out
+          test -n "$(find out -maxdepth 1 -type f -name '*.ELF' -print -quit)"
+
+      - name: Upload ELF
+        uses: actions/upload-artifact@v4
+        with:
+          name: PS2Launcher-PS1-USB-test
+          path: out/*.ELF
+          if-no-files-found: error
